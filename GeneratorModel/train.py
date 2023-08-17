@@ -2,12 +2,13 @@ from GeneratorModel.parameters import KATRINAParser
 from typing import Callable, Dict, List, Optional, Tuple, Iterable
 import numpy as np
 import os
-from data_processing import ListDataset,Dataprocessor_test
+from data_processing import ListDataset,Dataprocessor_QALD
 from transformers import Trainer
 from transformers import (
     AutoConfig,
     AutoTokenizer,
     BartTokenizer,
+    TrainingArguments,
     T5Tokenizer,
     set_seed,
     EvalPrediction,
@@ -21,7 +22,7 @@ def main():
     # See all possible arguments in src/transformers/training_args.py
     # or by passing the --help flag to this script.
     # We now keep distinct sets of args, for a cleaner separation of concerns.
-    parser = KATRINAParser(add_model_args=True,)
+    parser = KATRINAParser(add_model_args=True,add_training_args=True)
     parser.add_model_args()
 
     # args = argparse.Namespace(**params)
@@ -55,8 +56,8 @@ def main():
     # use_task_specific_params(model, data_args.task)
 
     # set num_beams for evaluation
-    if params["model_name"] is not None:
-        model.config.num_beams = params["model_name"]
+    if params["eval_beams"] is not None:
+        model.config.num_beams = params["eval_beams"]
     assert model.config.num_beams >= 1, f"got eval_beams={model.config.num_beams}. Need an integer >= 1"
 
     # set max length for generation
@@ -100,14 +101,14 @@ def main():
         # compute_metrics_fn = summarization_metrics if "summarization" in task_name else translation_metrics
         compute_metrics_fn = exact_match_metrics
         return compute_metrics_fn
-    dg=Dataprocessor_test(tokenizer)
+    dg=Dataprocessor_QALD(tokenizer,params)
 
     # Get datasets
     if params["train_model"]:
-        train_dataset = ListDataset(dg.process_training_ds(train_data))
+        train_dataset = ListDataset(dg.process_training_ds(params["training_ds"]))
     else:
         train_dataset = ListDataset(dg.process_training_ds([]))
-    eval_dataset = ListDataset(dg.process_training_ds(eval_data))
+    eval_dataset = ListDataset(dg.process_training_ds(params["eval_ds"]))
     '''
     if training_args.do_eval:
         eval_dataset = ListDataset(load_and_cache_examples(model_args, tokenizer, evaluate=True))
@@ -119,11 +120,9 @@ def main():
         # Initialize our Trainer
         trainer = Trainer(
             model=model,
-            args=params,
+            args=TrainingArguments(warmup_ratio=params["warmup_ratio"],label_smoothing_factor=params["label_smoothing"],output_dir=params["output_dir"],num_train_epochs=10),
             train_dataset=train_dataset,
             eval_dataset=eval_dataset,
-            #data_collator=partial(generation_collate_fn, tokenizer=tokenizer),
-            # prediction_loss_only=True
             compute_metrics=build_compute_metrics_fn(),
         )
 

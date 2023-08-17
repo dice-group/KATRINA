@@ -36,8 +36,8 @@ class KATRINAParser(argparse.ArgumentParser):
 
         if add_model_args:
             self.add_model_args()
-            if add_training_args:
-                self.add_training_args()
+        if add_training_args:
+            self.add_training_args()
     def add_model_args(self, args=None):
         """
         Add model args.
@@ -45,7 +45,7 @@ class KATRINAParser(argparse.ArgumentParser):
         parser = self.add_argument_group("Model Arguments")
         parser.add_argument(
             "--max_input_length",
-            default=256,
+            default=64,
             type=int,
             help="The maximum total input sequence length after WordPiece tokenization. \n"
             "Sequences longer than this will be truncated, and sequences shorter \n"
@@ -53,7 +53,7 @@ class KATRINAParser(argparse.ArgumentParser):
         )
         parser.add_argument(
             "--max_target_length",
-            default=256,
+            default=612,
             type=int,
             help="The maximum total input sequence length after WordPiece tokenization. \n"
                  "Sequences longer than this will be truncated, and sequences shorter \n"
@@ -77,28 +77,17 @@ class KATRINAParser(argparse.ArgumentParser):
             type=str,
             help="Pretrained tokenizer name or path if not the same as model_name",
         )
-        parser.add_argument(
-            "--train_data_file",
-            default=None,
-            type=str,
-            help="File with Training data",
-        )
-        parser.add_argument(
-            "--eval_data_file",
-            default=None,
-            type=str,
-            help="File with Training data",
-        )
+
         parser.add_argument(
             "--model_name",
-            default=None,
+            default="t5-small",
             type=str,
             help="path or name of model",
         )
         parser.add_argument(
             "--eval_beams",
             default=None,
-            type=str,
+            type=int,
             help="# num_beams to use for evaluation.",
         )
 
@@ -116,13 +105,13 @@ class KATRINAParser(argparse.ArgumentParser):
         )
         parser.add_argument(
             "--label_smoothing",
-            default=256,
+            default=0.0,
             type=float,
             help="The label smoothing epsilon to apply (if not zero).",
         )
         parser.add_argument(
             "--sortish_sampler",
-            default=None,
+            default=False,
             type=bool,
             help="Whether to SortishSamler or not.",
         )
@@ -140,7 +129,19 @@ class KATRINAParser(argparse.ArgumentParser):
         )
         parser.add_argument(
             "--output_dir",
-            default=True,
-            type=bool,
+            default="out",
+            type=str,
             help="Whether to train a model",
+        )
+        parser.add_argument(
+            "--training_ds",
+            default="../qa-data/QALD/QALD_9_plus.json",
+            type=str,
+            help="Path to trainig data",
+        )
+        parser.add_argument(
+            "--eval_ds",
+            default="../qa-data/QALD/QALD_10.json",
+            type=str,
+            help="Path to training data",
         )
