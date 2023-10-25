@@ -2,7 +2,7 @@ from GeneratorModel.parameters import KATRINAParser
 from typing import Callable, Dict, List, Optional, Tuple, Iterable
 import numpy as np
 import os
-from data_processing import ListDataset,Dataprocessor_QALD
+from data_processing import ListDataset,LCqUAD, LCqUAD_rep_vars,LCqUAD_rep_vars_triples, Dataprocessor_Combined_simple
 from transformers import Trainer
 from transformers import (
     AutoConfig,
@@ -101,7 +101,7 @@ def main():
         # compute_metrics_fn = summarization_metrics if "summarization" in task_name else translation_metrics
         compute_metrics_fn = exact_match_metrics
         return compute_metrics_fn
-    dg=Dataprocessor_QALD(tokenizer,params)
+    dg=Dataprocessor_Combined_simple(tokenizer, params)
 
     # Get datasets
     if params["train_model"]:
@@ -120,10 +120,11 @@ def main():
         # Initialize our Trainer
         trainer = Trainer(
             model=model,
-            args=TrainingArguments(warmup_ratio=params["warmup_ratio"],label_smoothing_factor=params["label_smoothing"],output_dir=params["output_dir"],num_train_epochs=10),
+            args=TrainingArguments(warmup_ratio=params["warmup_ratio"],label_smoothing_factor=params["label_smoothing"],output_dir=params["output_dir"],num_train_epochs=50,save_total_limit=10),
             train_dataset=train_dataset,
             eval_dataset=eval_dataset,
             compute_metrics=build_compute_metrics_fn(),
+
         )
 
         trainer.train(

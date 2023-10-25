@@ -21,7 +21,13 @@ class Edge:
         self.src=src
         self.dest=dest
         self.label=label
+from transformers import T5Tokenizer, T5ForConditionalGeneration
+from GeneratorModel.data_processing import Dataprocessor_test
+import json
 
+dp=Dataprocessor_test(T5Tokenizer.from_pretrained("out"),"")
+tokenizer = T5Tokenizer.from_pretrained("out")
+model = T5ForConditionalGeneration.from_pretrained("out-wikidata-labels/checkpoint-150000")
 
 def graph_to_dict(graph,nodes,edges,leaves,parent_id=None):
 
@@ -54,29 +60,55 @@ def graph_to_dict(graph,nodes,edges,leaves,parent_id=None):
     '''
     return {"nodes":nodes,"edges":edges}
 
+
 def process_query(query_str):
+    query_triples=[]
+    query_patterns=[]
     parsed_query=sparql.parser.parseQuery(query_str)
     entities=set()
     relations=set()
     en = algebra.translateQuery(parsed_query)
-    graph=gentree(en)
-    #process_path(parsed_query.algebra["p"],nodes,edges)
-    #triples=get_path(parsed_query.algebra)
-    graph=graph_to_dict(graph,[],[],{},None)
-     #out={"query_str":query_str,"graph":graph}
-    for node in graph["nodes"]:
-        if "type"in node and node["type"]=="<class 'rdflib.term.URIRef'>":
-            if "P" in node["value"]:
-                relations.add(node["value"])
-            else:
-                entities.add(node["value"])
-    return entities,relations
+    #en.algebra["PV"]=list(en.algebra["_vars"])
+    #en.algebra.name="SelectQuery"
+    #endpoint=CompValue(name="DataClause")
+    #endpoint["default"]="http://20230607-truthy.wikidata.data.dice-research.org/"
 
+    #en.algebra["datasetClause"]=endpoint
+    g = rdflib.Graph()
 
+    res=g.query(en)
+    if len(res)>0:
+        triples = gentree(en)
+        for t in triples:
+            query_pattern=[str(t[0]),str(t[1]),str(t[2])]
+            if isinstance(t[0],rdflib.Variable):
+                query_pattern[0]="_var"
+            if isinstance(t[2],rdflib.Variable):
+                query_pattern[2]="_var"
+            query_patterns.append(query_pattern)
+        vars=res.vars
+        var_map={}
+        for i in range(0,len(vars)):
+            var_map[str(vars[i])]=i
+        for r in res:
+            for triple in triples:
+                if isinstance(triple[0],rdflib.Variable):
+                    s=str(r[var_map[str(triple[0])]])
+                else:
+                    s=str(triple[0])
+                p=str(triple[1])
+                if isinstance(triple[2],rdflib.Variable):
+                    o=str(r[var_map[str(triple[2])]])
+                else:
+                    o=str(triple[2])
+                query_triples.append([s,p,o])
+            #print(r)
+        #print(res)
 
+    return query_triples,query_patterns
 
 def gentree(q):
-
+    triples=[]
     def pp(p, parent):
         # if isinstance(p, list):
         #     print "[ "
@@ -86,6 +118,8 @@ def gentree(q):
         from rdflib.plugins.sparql.parser import TriplesBlock
         if p is None:
             return
+        if "triples" in p:
+            triples.extend(p["triples"])
         if isinstance(p, (rdflib.URIRef,rdflib.Variable,rdflib.Literal,str,int)):
 
             n=Leave(p,str(p.__class__))
@@ -135,7 +169,9 @@ def gentree(q):
     #try:
     n=Node_Tiny("root")
     pp(q.algebra,n)
-    return n
+    return triples
+
+
 
 prefixes="""
 PREFIX wd: <http://www.wikidata.org/entity/>
@@ -149,17 +185,55 @@ PREFIX pq: <http://www.wikidata.org/prop/qualifier/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX bd: <http://www.bigdata.com/rdf#>
 """
+'''
+query="SELECT (COUNT(?obj) AS ?value ) { wd:Q190679 wdt:P1080 ?obj }"
 
-data=json.load(open("../qa-data/LCQUAD/test.json","r",encoding="utf-8"))
+query="Select * where " + query[query.find("{"):len(query)]
+query=query.replace("{","{ SERVICE <https://20230607-truthy.wikidata.data.dice-research.org/sparql> {",1)
+lb=query.rfind("}")
+query=query[0:lb]+"}"+query[lb:len(query)]
+"SERVICE{ < https: // 20230607 - truthy.wikidata.data.dice - research .org / sparql >"
+process_query(prefixes+query)
+'''
+'''
+data=json.load(open("../qa-data/LCQUAD/test-with-resources-labels.json","r",encoding="utf-8"))
 for question in data:
     try:
-        process_query(prefixes+question["sparql_wikidata"])
-        entities,relations=process_query(prefixes+question["sparql_wikidata"])
-        question["entities"]=list(entities)
-        question["relations"]=list(relations)
+        print(question["uid"])
+        query=question["sparql_wikidata"]
+        query="Select * where " + query[query.find("{"):len(query)]
+        query=query.replace("{","{ SERVICE <https://20230607-truthy.wikidata.data.dice-research.org/sparql> {",1)
+        lb=query.rfind("}")
+        query=query[0:lb]+"}"+query[lb:len(query)]
+
+        query_triples=process_query(prefixes+query)
+        question["triples"]=query_triples
+        #entities,relations=process_query(prefixes+query)
+        #question["entities"]=list(entities)
+        #question["relations"]=list(relations)
     except:
         print(question["sparql_wikidata"]+" failed")
-json.dump(data,open("../qa-data/LCQUAD/test-with-resources.json","w",encoding="utf-8"))
+json.dump(data,open("../qa-data/LCQUAD/test-with-triples.json","w",encoding="utf-8"))
+'''
+data=json.load(open("../qa-data/LCQUAD/train-with-resources-labels.json","r",encoding="utf-8"))
+for question in data:
+    try:
+        print(question["uid"])
+        query=question["sparql_wikidata"]
+        query="Select * where " + query[query.find("{"):len(query)]
+        query=query.replace("{","{ SERVICE <https://20230607-truthy.wikidata.data.dice-research.org/sparql> {",1)
+        lb=query.rfind("}")
+        query=query[0:lb]+"}"+query[lb:len(query)]
+
+        query_triples,query_patterns=process_query(prefixes+query)
+        question["triples"]=query_triples
+        question["patterns"] = query_patterns
+        #entities,relations=process_query(prefixes+query)
+        #question["entities"]=list(entities)
+        #question["relations"]=list(relations)
+    except:
+        print(question["sparql_wikidata"]+" failed")
+json.dump(data,open("../qa-data/LCQUAD/LCQUAD_triples_patterns.json","w",encoding="utf-8"))
 
 
 '''

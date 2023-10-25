@@ -45,7 +45,7 @@ class KATRINAParser(argparse.ArgumentParser):
         parser = self.add_argument_group("Model Arguments")
         parser.add_argument(
             "--max_input_length",
-            default=64,
+            default=512,
             type=int,
             help="The maximum total input sequence length after WordPiece tokenization. \n"
             "Sequences longer than this will be truncated, and sequences shorter \n"
@@ -53,7 +53,7 @@ class KATRINAParser(argparse.ArgumentParser):
         )
         parser.add_argument(
             "--max_target_length",
-            default=612,
+            default=512,
             type=int,
             help="The maximum total input sequence length after WordPiece tokenization. \n"
                  "Sequences longer than this will be truncated, and sequences shorter \n"
@@ -80,7 +80,7 @@ class KATRINAParser(argparse.ArgumentParser):
 
         parser.add_argument(
             "--model_name",
-            default="t5-small",
+            default="t5-large",
             type=str,
             help="path or name of model",
         )
@@ -129,19 +129,19 @@ class KATRINAParser(argparse.ArgumentParser):
         )
         parser.add_argument(
             "--output_dir",
-            default="out",
+            default="out-combined-simple-limtest",
             type=str,
             help="Whether to train a model",
         )
         parser.add_argument(
             "--training_ds",
-            default="../qa-data/QALD/QALD_9_plus.json",
+            default="../qa-data/combined/train",
             type=str,
             help="Path to trainig data",
         )
         parser.add_argument(
             "--eval_ds",
-            default="../qa-data/QALD/QALD_10.json",
+            default="../qa-data/combined/test",
             type=str,
             help="Path to training data",
         )

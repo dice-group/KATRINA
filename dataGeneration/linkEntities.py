@@ -27,12 +27,13 @@ for question in data:
             ent_str = ent_str.replace("http://www.wikidata.org/prop/", "")
             if ent_str in relationlabels:
                 entity={"uri":entity,"label":relationlabels[ent_str]}
+                relations.append(entity)
             else:
                missingrelations.add(ent_str)
-            relations.append(entity)
+
         question["relations"]=relations
-pickle.dump(missingrelations,open("missing_rel","wb"))
-json.dump(data, open("../qa-data/LCQUAD/train-with-resources-labels.json", "w", encoding="utf-8"))
+#pickle.dump(missingrelations,open("missing_rel","wb"))
+json.dump(data, open("../qa-data/LCQUAD/train-with-resources-labels-update.json", "w", encoding="utf-8"))
 
 
 
