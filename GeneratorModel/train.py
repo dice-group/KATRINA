@@ -1,4 +1,4 @@
-from GeneratorModel.parameters import KATRINAParser
+from parameters import KATRINAParser
 from typing import Callable, Dict, List, Optional, Tuple, Iterable
 import numpy as np
 import os
