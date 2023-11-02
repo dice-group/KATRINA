@@ -35,7 +35,7 @@ def get_answers(query_str):
 for ques in data["questions"]:
         input=ques["question"][0]["string"]+"[SEP]target_wikidata"
         print(input)
-        print(ques["sparql_wikidata"])
+        print(ques["query"]["sparql"])
         labels="emp"
         sample = dp.process_sample(input,labels)
         i=dp.process_sample(input).input_ids
@@ -47,7 +47,7 @@ for ques in data["questions"]:
         query.replace("_var_", "?var")
         query.replace("_cbo_", "{")
         query.replace("_cbc_", "}")
+        print(query)
         answers=get_answers(query)
         print(answers)
         ques["answers"]=answers
-        print(query)
