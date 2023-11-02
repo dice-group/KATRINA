@@ -5,7 +5,7 @@ from SPARQLWrapper import SPARQLWrapper,JSON
 dp=Dataprocessor_test(T5Tokenizer.from_pretrained("t5-large"),"")
 tokenizer = T5Tokenizer.from_pretrained("t5-large")
 model = T5ForConditionalGeneration.from_pretrained("out-combined-simple-limtest/checkpoint-213500")
-data=json.load(open("../qa-data/combined/test/lcquad.json","r",encoding="utf-8"))
+data=json.load(open("../qa-data/LCQUAD/test/lcquad-test-quald.json","r",encoding="utf-8"))
 '''
 input="How many chancellors did Germany have?"
 #print(input)
