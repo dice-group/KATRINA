@@ -43,10 +43,10 @@ for ques in data["questions"]:
         # the forward function automatically creates the correct decoder_input_ids
         out = model.generate(input_ids = i,max_length=650)
         query = tokenizer.decode(out[0], skip_special_tokens=True)+"\n"
-        query.replace("_result_","?result")
-        query.replace("_var_", "?var")
-        query.replace("_cbo_", "{")
-        query.replace("_cbc_", "}")
+        query=query.replace("_result_","?result")
+        query=query.replace("_var_", "?var")
+        query=query.replace("_cbo_", "{")
+        query=query.replace("_cbc_", "}")
         print(query)
         answers=get_answers(query)
         print(answers)
