@@ -2,9 +2,12 @@ from transformers import T5Tokenizer, T5ForConditionalGeneration
 from data_processing import Dataprocessor_test
 import json
 from SPARQLWrapper import SPARQLWrapper,JSON
+import torch
+device = "cuda:0" if torch.cuda.is_available() else "cpu"
 dp=Dataprocessor_test(T5Tokenizer.from_pretrained("t5-large"),"")
 tokenizer = T5Tokenizer.from_pretrained("t5-large")
 model = T5ForConditionalGeneration.from_pretrained("out-combined-simple-limtest/checkpoint-213500")
+model.to(device)
 data=json.load(open("../qa-data/LCQUAD/lcquad-test-quald.json","r",encoding="utf-8"))
 '''
 input="How many chancellors did Germany have?"
@@ -41,7 +44,7 @@ for ques in data["questions"]:
         i=dp.process_sample(input).input_ids
         #l=dp.process_sample(labels).input_ids
         # the forward function automatically creates the correct decoder_input_ids
-        out = model.generate(input_ids = i,max_length=650)
+        out = model.generate(input_ids = i.to(device),max_length=650)
         query = tokenizer.decode(out[0], skip_special_tokens=True)+"\n"
         query=query.replace("_result_","?result")
         query=query.replace("_var_", "?var")
