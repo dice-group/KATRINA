@@ -51,3 +51,4 @@ for ques in data["questions"]:
         answers=get_answers(query)
         print(answers)
         ques["answers"]=answers
+json.dump(data,open("../qa-data/LCQUAD/lcquad-test-output-t5large.json","w",encoding="utf-8"))
