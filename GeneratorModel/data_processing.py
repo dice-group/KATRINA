@@ -361,13 +361,35 @@ class Dataprocessor_Combined_simple(Dataprocessor_KBQA_basic):
                 samples.append(sample)
 
         grail_qa = json.load(open(path_to_ds+"/grail.json"))
+
         for el in tqdm(grail_qa):
             question_str = el["question"]
+
+
+            def preprocessfreebasequery(query_str):
+                processed_query=""
+                #print(query_str)
+                query_split=query_str.split("\n")
+                values={}
+                for el in query_split:
+                    if "VALUES" in el:
+                        key=el[len("VALUES "):el.index("{")-1]
+                        value=el[el.index("{")+2:el.index("}")+-1]
+                        values[key]=value
+                    elif not "FILTER" in el:
+                        processed_query+=el
+                for k in values.keys():
+                    processed_query = processed_query.replace(k,values[k])
+                return processed_query
+
             query = el["sparql_query"]
             nodes = el["graph_query"]["nodes"]
             edges = el["graph_query"]["edges"]
+            query=preprocessfreebasequery(query)
             parsed_query = sparql.parser.parseQuery(query)
+
             en = algebra.translateQuery(parsed_query)
+
             '''
             for e in edges:
                 query = query.replace(e["relation"], e["friendly_name"])
