@@ -478,7 +478,8 @@ class Dataprocessor_Combined_entities(Dataprocessor_KBQA_basic):
             question_str = el["question"]+"[SEP] "
             nodes=el["graph_query"]["nodes"]
             for n in nodes:
-                question_str += n["friendly_name"] + " : " + n["id"]+ " , "
+                if not n["node_type"] == "literal":
+                    question_str += n["friendly_name"] + " : " + n["id"]+ " , "
 
 
 
