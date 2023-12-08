@@ -6,7 +6,7 @@ import torch
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 dp=Dataprocessor_test(T5Tokenizer.from_pretrained("t5-large"),"")
 tokenizer = T5Tokenizer.from_pretrained("t5-large")
-model = T5ForConditionalGeneration.from_pretrained("t5-large-baseline")
+model = T5ForConditionalGeneration.from_pretrained("/data/KATRINA/out-combined-simple-limtest")
 model.to(device)
 data=json.load(open("../qa-data/GrailQA_v1.0/grailqa_dev_qald.json","r",encoding="utf-8"))
 '''
