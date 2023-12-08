@@ -6,7 +6,7 @@ import torch
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 dp=Dataprocessor_test(T5Tokenizer.from_pretrained("t5-large"),"")
 tokenizer = T5Tokenizer.from_pretrained("t5-large")
-model = T5ForConditionalGeneration.from_pretrained("out-combined-simple-limtest/checkpoint-213500")
+model = T5ForConditionalGeneration.from_pretrained("t5-large-baseline")
 model.to(device)
 data=json.load(open("../qa-data/GrailQA_v1.0/grailqa_dev_qald.json","r",encoding="utf-8"))
 '''
@@ -22,9 +22,10 @@ out = model.generate(input_ids = i,max_length=650)
 '''
 #print(tokenizer.decode(out[0], skip_special_tokens=True))
 def get_answers(query_str):
+    prefixes="PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX : <http://rdf.freebase.com/ns/> "
     try:
         sparql = SPARQLWrapper("https://freebase.data.dice-research.org/sparql")
-        sparql.setQuery(query_str)
+        sparql.setQuery(prefixes+query_str)
         sparql.setReturnFormat(JSON)
         results = sparql.query().convert()
         if not "boolean" in results:
