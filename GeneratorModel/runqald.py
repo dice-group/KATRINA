@@ -36,22 +36,25 @@ def get_answers(query_str):
         return {'head': {'vars': 'result'}, 'results': {'bindings': []}}
 
 for ques in data["questions"]:
-        input=ques["question"][0]["string"]+"[SEP]target_wikidata"
-        print(input)
-        print(ques["query"]["sparql"])
-        labels="emp"
-        sample = dp.process_sample(input,labels)
-        i=dp.process_sample(input).input_ids
-        #l=dp.process_sample(labels).input_ids
-        # the forward function automatically creates the correct decoder_input_ids
-        out = model.generate(input_ids = i.to(device),max_length=650)
-        query = tokenizer.decode(out[0], skip_special_tokens=True)+"\n"
-        query=query.replace("_result_","?result")
-        query=query.replace("_var_", "?var")
-        query=query.replace("_cbo_", "{")
-        query=query.replace("_cbc_", "}")
-        print(query)
-        answers=get_answers(query)
-        print(answers)
-        ques["answers"]=answers
+    if ques["question"][0]["string"] is not None:
+            input=ques["question"][0]["string"]+"[SEP]target_wikidata"
+            print(input)
+            print(ques["query"]["sparql"])
+            labels="emp"
+            sample = dp.process_sample(input,labels)
+            i=dp.process_sample(input).input_ids
+            #l=dp.process_sample(labels).input_ids
+            # the forward function automatically creates the correct decoder_input_ids
+            out = model.generate(input_ids = i.to(device),max_length=650)
+            query = tokenizer.decode(out[0], skip_special_tokens=True)+"\n"
+            query=query.replace("_result_","?result")
+            query=query.replace("_var_", "?var")
+            query=query.replace("_cbo_", "{")
+            query=query.replace("_cbc_", "}")
+            print(query)
+            answers=get_answers(query)
+            print(answers)
+            ques["answers"]=answers
+    else:
+        ques["answers"]={'head': {'vars': 'result'}, 'results': {'bindings': []}}
 json.dump(data,open("../qa-data/LCQUAD/lcquad-test-output-t5large.json","w",encoding="utf-8"))
