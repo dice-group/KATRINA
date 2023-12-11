@@ -6,7 +6,7 @@ import torch
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 dp=Dataprocessor_test(T5Tokenizer.from_pretrained("t5-large"),"")
 tokenizer = T5Tokenizer.from_pretrained("t5-large")
-model = T5ForConditionalGeneration.from_pretrained("out-combined-simple-limtest/checkpoint-213500")
+model = T5ForConditionalGeneration.from_pretrained("/data/KATRINA/out-combined-simple-limtest")
 model.to(device)
 data=json.load(open("../qa-data/LCQUAD/lcquad-test-quald.json","r",encoding="utf-8"))
 '''
