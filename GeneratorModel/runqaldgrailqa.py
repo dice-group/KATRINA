@@ -68,4 +68,4 @@ for ques in data["questions"]:
         answers=get_answers(query)
         print(answers)
         ques["answers"]=answers
-json.dump(data,open("../qa-data/GrailQA_v1.0/grail-dev-output-t5large.json","w",encoding="utf-8"))
+json.dump(data,open("../qa-data/GrailQA_v1.0/grail-dev-output-entities-t5large.json","w",encoding="utf-8"))
