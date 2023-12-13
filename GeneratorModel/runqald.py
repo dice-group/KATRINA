@@ -6,8 +6,16 @@ import torch
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 dp=Dataprocessor_test(T5Tokenizer.from_pretrained("t5-large"),"")
 tokenizer = T5Tokenizer.from_pretrained("t5-large")
-model = T5ForConditionalGeneration.from_pretrained("/data/KATRINA/out-combined-simple-limtest")
+model = T5ForConditionalGeneration.from_pretrained("/data/KATRINA/out-simple-entities")
+#model = T5ForConditionalGeneration.from_pretrained("t5-large-baseline")
 model.to(device)
+ent_data=json.load(open("../qa-data/combined/test/lcquad.json","r",encoding="utf-8"))
+enitity_map={}
+for ques in ent_data:
+    if "entities"in ques:
+        id=ques["uid"]
+        entities=ques["entities"]
+        enitity_map[id]=entities
 data=json.load(open("../qa-data/LCQUAD/lcquad-test-quald.json","r",encoding="utf-8"))
 '''
 input="How many chancellors did Germany have?"
@@ -37,7 +45,12 @@ def get_answers(query_str):
 
 for ques in data["questions"]:
     if ques["question"][0]["string"] is not None:
-            input=ques["question"][0]["string"]+"[SEP]target_wikidata"
+            input=ques["question"][0]["string"]+"[SEP] "
+            if ques["id"]in enitity_map:
+                entities = enitity_map[ques["id"]]
+                for ent in entities:
+                    input += ent["label"] + " : " + ent["uri"].replace("http://www.wikidata.org/entity/", "") + " , "
+            input+="[SEP]target_wikidata"
             print(input)
             print(ques["query"]["sparql"])
             labels="emp"
@@ -57,4 +70,4 @@ for ques in data["questions"]:
             ques["answers"]=answers
     else:
         ques["answers"]={'head': {'vars': 'result'}, 'results': {'bindings': []}}
-json.dump(data,open("../qa-data/LCQUAD/lcquad-test-output-t5large.json","w",encoding="utf-8"))
+json.dump(data,open("../qa-data/LCQUAD/lcquad-test-output-entities-t5large.json","w",encoding="utf-8"))
