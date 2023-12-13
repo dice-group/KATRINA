@@ -3,11 +3,18 @@ from data_processing import Dataprocessor_test
 import json
 from SPARQLWrapper import SPARQLWrapper,JSON
 import torch
+ent_data=json.load(open("../qa-data/combined/test/grail.json","r",encoding="utf-8"))
+enitity_map={}
+for ques in ent_data:
+    id=ques["qid"]
+    entities=ques["graph_query"]["nodes"]
+    enitity_map[id]=entities
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 dp=Dataprocessor_test(T5Tokenizer.from_pretrained("t5-large"),"")
 tokenizer = T5Tokenizer.from_pretrained("t5-large")
-model = T5ForConditionalGeneration.from_pretrained("/data/KATRINA/out-combined-simple-limtest")
+model = T5ForConditionalGeneration.from_pretrained("/data/KATRINA/out-simple-entities")
 model.to(device)
+
 data=json.load(open("../qa-data/GrailQA_v1.0/grailqa_dev_qald.json","r",encoding="utf-8"))
 '''
 input="How many chancellors did Germany have?"
@@ -37,7 +44,13 @@ def get_answers(query_str):
         return {'head': {'vars': 'result'}, 'results': {'bindings': []}}
 
 for ques in data["questions"]:
-        input=ques["question"][0]["string"]+"[SEP]target_freebase"
+        input=ques["question"][0]["string"]+"[SEP] "
+        if ques["id"] in enitity_map:
+            nodes = enitity_map[ques["id"]]
+            for n in nodes:
+                if not n["node_type"] == "literal":
+                    input += n["friendly_name"] + " : " + n["id"] + " , "
+        input += "[SEP]target_freebase"
         print(input)
         print(ques["query"]["sparql"])
         labels="emp"
