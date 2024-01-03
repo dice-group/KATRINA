@@ -343,65 +343,25 @@ class Dataprocessor_Combined_simple(Dataprocessor_KBQA_basic):
                     if key in entitylabels:
                         ent_str+=entitylabels[key]+", "
 
-                sample = {"input": question_str, "label": question_str+" "+ent_str}
+                sample = {"input": question_str+"[SEP]target_wikidata", "label": question_str+" "+ent_str}
                 samples.append(sample)
 
-        #grail_qa = json.load(open(path_to_ds+"/grail.json"))
+        grail_qa = json.load(open(path_to_ds+"/grail.json"))
 
-        '''
+
         for el in tqdm(grail_qa):
             question_str = el["question"]
-
-        
-            def preprocessfreebasequery(query_str):
-                processed_query=""
-                #print(query_str)
-                query_split=query_str.split("\n")
-                values={}
-                for el in query_split:
-                    if "VALUES" in el:
-                        key=el[len("VALUES "):el.index("{")-1]
-                        value=el[el.index("{")+2:el.index("}")+-1]
-                        values[key]=value
-                    elif not "FILTER" in el:
-                        processed_query+=el
-                for k in values.keys():
-                    processed_query = processed_query.replace(k,values[k])
-                return processed_query
-
-            query = el["sparql_query"]
+            target = el["question"] + "[SEP] "
             nodes = el["graph_query"]["nodes"]
-            edges = el["graph_query"]["edges"]
-            query=preprocessfreebasequery(query)
-            parsed_query = sparql.parser.parseQuery(query)
+            ent_str = "entities:"
+            for n in nodes:
+                if not n["node_type"] == "literal":
+                    ent_str += n["friendly_name"] + " , "
 
-            en = algebra.translateQuery(parsed_query)
-
-
-            query = query.replace("\n", "")
-            query = query.replace("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>", "")
-            query = query.replace(
-                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>", "")
-            query = query.replace(
-                "PREFIX : <http://rdf.freebase.com/ns/> ", "")
-
-            res_vars = en.algebra["PV"]
-            vars = en.algebra["_vars"]
-            it = 0
-
-            for el in res_vars:
-                query = query.replace("?" + el, "_result_" + str(it))
-                it += 1
-            it = 0
-            for el in vars:
-                query = query.replace("?" + el, "_var_" + str(it))
-                it += 1
-            query = query.replace("{", "_cbo_")
-            query = query.replace("}", "_cbc_")
-            sample = {"input": question_str+"[SEP]target_freebase", "label": query}
+            sample = {"input": question_str+"[SEP]target_freebase", "label": question_str+" "+ent_str}
 
             samples.append(sample)
-            '''
+
         return samples
 class Dataprocessor_QALD(Dataprocessor_KBQA_basic):
     def read_ds_to_list(self,path_to_ds):
