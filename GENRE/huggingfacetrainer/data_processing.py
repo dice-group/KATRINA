@@ -101,7 +101,7 @@ class Dataprocessor_Combined_simple(Dataprocessor_KBQA_basic):
                 PREFIX bd: <http://www.bigdata.com/rdf#>
                 """
         lcquad_data = json.load(open(path_to_ds+"/lcquad.json"))
-        entitylabels = pickle.load(open("../alt_dict_wikidata.pkl", "rb"))
+        entitylabels = pickle.load(open("../GENRE/alt_dict_wikidata.pkl", "rb"))
         samples=[]
 
         for question in tqdm(lcquad_data):
@@ -124,7 +124,7 @@ class Dataprocessor_Combined_simple(Dataprocessor_KBQA_basic):
                             samples.append(sample)
         grail_qa = json.load(open(path_to_ds+"/grail.json"))
 
-        entitylabels = pickle.load(open("../alt_dict_freebase.pkl", "rb"))
+        entitylabels = pickle.load(open("../GENRE/alt_dict_freebase.pkl", "rb"))
         for el in tqdm(grail_qa):
             question_str = el["question"]
             nodes = el["graph_query"]["nodes"]
