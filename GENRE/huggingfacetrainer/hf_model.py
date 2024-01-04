@@ -15,7 +15,7 @@ from transformers import (
     MBartForConditionalGeneration,
 )
 
-from GENRE.genre.utils import chunk_it, post_process_wikidata
+#from utils import chunk_it, post_process_wikidata
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +48,7 @@ class _GENREHubInterface:
             return_dict_in_generate=True,
             **kwargs
         )
-
+        '''
         outputs = chunk_it(
             [
                 {"text": text, "score": score,}
@@ -61,11 +61,11 @@ class _GENREHubInterface:
             ],
             len(sentences),
         )
-
+        
         outputs = post_process_wikidata(
             outputs, text_to_id=text_to_id, marginalize=marginalize
         )
-
+        '''
         return outputs
 
     def encode(self, sentence):
