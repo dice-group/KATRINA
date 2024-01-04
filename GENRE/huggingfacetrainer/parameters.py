@@ -1,7 +1,7 @@
 import argparse
 import os
 
-class KATRINAParser(argparse.ArgumentParser):
+class GenreParser(argparse.ArgumentParser):
     """
     Provide an opt-producer and CLI arguement parser.
 
@@ -45,7 +45,7 @@ class KATRINAParser(argparse.ArgumentParser):
         parser = self.add_argument_group("Model Arguments")
         parser.add_argument(
             "--max_input_length",
-            default=128,
+            default=512,
             type=int,
             help="The maximum total input sequence length after WordPiece tokenization. \n"
             "Sequences longer than this will be truncated, and sequences shorter \n"
@@ -135,13 +135,13 @@ class KATRINAParser(argparse.ArgumentParser):
         )
         parser.add_argument(
             "--training_ds",
-            default="../qa-data/combined/train",
+            default="../../qa-data/combined/train",
             type=str,
             help="Path to trainig data",
         )
         parser.add_argument(
             "--eval_ds",
-            default="../qa-data/combined/test",
+            default="../../qa-data/combined/test",
             type=str,
             help="Path to training data",
         )

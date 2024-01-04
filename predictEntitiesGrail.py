@@ -14,7 +14,7 @@ def query(query_str):
     #                     data='components=mgenre_el&'+ query_str)
     return resp.json()
 files=[
-    "qa-data/GrailQA_v1.0/grailqa_v1.0_train.json",
+    "qa-data/GrailQA_v1.0/grailqa_v1.0_dev.json",
     #"dataset_updates/data_qald_test.json",
     #"dataset_updates/data_qald_train.json",
     #"dataset_updates/data_train.json"
@@ -26,7 +26,9 @@ for file in files:
                 for sample in data:
                     question=sample["question"]
                     ent_list = []
+
                     if question is not None:
+                        '''
                         try:
                             entities=query(question)
 
@@ -38,7 +40,9 @@ for file in files:
                                     ent_list.append({"mention":question[ent["start"]:ent["end"]],"id":ent["link"],"friendly_name":ent["surface_form"]})
                         except:
                             print("query failed")
+                        
                         sample["wikidata_entities"]=ent_list
+                        '''
                         entities = entity_linker.identify_entities(question)
                         print(entities)
                         ent_list=[]
@@ -46,4 +50,4 @@ for file in files:
                             ent_list.append(
                                 {"mention": ent.mention, "id": ent.entity.id, "friendly_name": ent.entity.name})
                         sample["freebase_entities"] = ent_list
-                json.dump(data, open("qa-data/GrailQA_v1.0/grailqa_v1.0_train_with_entities.json", "w", encoding="utf-8"))
+                json.dump(data, open("qa-data/GrailQA_v1.0/grailqa_v1.0_dev_with_entities.json", "w", encoding="utf-8"))
