@@ -1,4 +1,4 @@
-from GENRE.genre.hf_model import GENRE as genre_hf
+from hf_model import GENRE as genre_hf
 from parameters import GenreParser
 from typing import Callable, Dict, List, Optional, Tuple, Iterable
 import numpy as np
