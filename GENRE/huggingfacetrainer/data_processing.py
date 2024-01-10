@@ -118,7 +118,7 @@ class Dataprocessor_Combined_simple(Dataprocessor_KBQA_basic):
                     if "alternatives" in entitylabels_alt[key]:
                         for alt in entitylabels_alt[key]["alternatives"]:
                             sample = {"input": question_str +
-                                               "[START_ENT]"+alt +
+                                               " [START_ENT]"+alt +
                                                "[END_ENT] [SEP]target_wikidata" , "label": entitylabels_alt[key]["label"]}
                             samples.append(sample)
         grail_qa = json.load(open(path_to_ds+"/grail.json"))
