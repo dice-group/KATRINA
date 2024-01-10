@@ -101,9 +101,8 @@ class Dataprocessor_Combined_simple(Dataprocessor_KBQA_basic):
                 PREFIX bd: <http://www.bigdata.com/rdf#>
                 """
         lcquad_data = json.load(open(path_to_ds+"/lcquad.json"))
-        entitylabels = pickle.load(open("../GENRE/alt_dict_wikidata.pkl", "rb"))
+        entitylabels_alt = pickle.load(open("../GENRE/alt_dict_wikidata.pkl", "rb"))
         samples=[]
-
         for question in tqdm(lcquad_data):
             # print(question)
             if "entities" in question and "relations" in question and question["question"] is not None:
@@ -111,33 +110,34 @@ class Dataprocessor_Combined_simple(Dataprocessor_KBQA_basic):
                 query = question["sparql_wikidata"]
                 for ent in question["entities"]:
                     key = ent["uri"].replace("http://www.wikidata.org/entity/", "")
-                    if key in entitylabels:
+                    if key in entitylabels_alt:
                         #ent_str+=entitylabels[key]+", "
-                        sample = {"input": question_str+"[START_ENT]"+entitylabels[key]["label"]+
-                                           "[END_ENT] [SEP]target_wikidata", "label": entitylabels[key]["label"]}
+                        sample = {"input": question_str+"[START_ENT]"+entitylabels_alt[key]["label"]+
+                                           "[END_ENT] [SEP]target_wikidata", "label": entitylabels_alt[key]["label"]}
                         samples.append(sample)
-                    if "alternatives" in entitylabels[key]:
-                        for alt in entitylabels[key]["alternatives"]:
+                    if "alternatives" in entitylabels_alt[key]:
+                        for alt in entitylabels_alt[key]["alternatives"]:
                             sample = {"input": question_str +
                                                "[START_ENT]"+alt +
-                                               "[END_ENT] [SEP]target_wikidata" , "label": entitylabels[key]["label"]}
+                                               "[END_ENT] [SEP]target_wikidata" , "label": entitylabels_alt[key]["label"]}
                             samples.append(sample)
         grail_qa = json.load(open(path_to_ds+"/grail.json"))
-
-        entitylabels = pickle.load(open("../GENRE/alt_dict_freebase.pkl", "rb"))
+        entitylabels = pickle.load(open("../GENRE/label_dict_freebase.pkl", "rb"))
+        entitylabels_alt = pickle.load(open("../GENRE/alt_dict_freebase.pkl", "rb"))
+        #print(list(entitylabels.keys()))
         for el in tqdm(grail_qa):
             question_str = el["question"]
             nodes = el["graph_query"]["nodes"]
             for n in nodes:
                 if not n["node_type"] == "literal":
-                    sample = {"input": question_str+"[START_ENT]"+entitylabels[n["id"]]["label"]+
-                                           "[END_ENT] [SEP]target_freebase", "label": entitylabels[n["id"]]["label"]}
+                    sample = {"input": question_str+"[START_ENT]"+entitylabels_alt[n["id"]]["label"]+
+                                           "[END_ENT] [SEP]target_freebase", "label": entitylabels[n["id"]]}
                     samples.append(sample)
-                    if "alternatives" in entitylabels[n["id"]]:
-                        for alt in entitylabels[n["id"]]["alternatives"]:
+                    if "alternatives" in entitylabels_alt[n["id"]]:
+                        for alt in entitylabels_alt[n["id"]]["alternatives"]:
                             sample = {"input": question_str +
                                                "[START_ENT]" + alt +
-                                               "[END_ENT] [SEP]target_freebase", "label": entitylabels[n["id"]]["label"]}
+                                               "[END_ENT] [SEP]target_freebase", "label": entitylabels[n["id"]]}
                             samples.append(sample)
 
         return samples
