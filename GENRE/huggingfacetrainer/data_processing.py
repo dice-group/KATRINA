@@ -71,6 +71,7 @@ class Dataprocessor_KBQA_basic(Dataprocessor):
         encoding.data["attention_mask"] = torch.flatten(padded_attention_mask)
 
         target = encoding.data["labels"]
+        target[0,0]=2
         padded_target_tensor = self.tokenizer.pad_token_id * torch.ones(
             (target.shape[0], self.args["max_target_length"]), dtype=target.dtype, device=target.device
         )
@@ -138,6 +139,7 @@ class Dataprocessor_Combined_simple(Dataprocessor_KBQA_basic):
                             sample = {"input": question_str +
                                                "[START_ENT]" + alt +
                                                "[END_ENT] [SEP]target_freebase", "label": entitylabels[n["id"]]}
+
                             samples.append(sample)
 
         return samples
