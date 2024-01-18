@@ -425,22 +425,26 @@ class Dataprocessor_Combined_simple(Dataprocessor_KBQA_basic):
 class Dataprocessor_Combined_entities(Dataprocessor_KBQA_basic):
     def read_ds_to_list(self, path_to_ds):
         prefixes = """
-                PREFIX wd: <http://www.wikidata.org/entity/>
-                PREFIX wds: <http://www.wikidata.org/entity/statement/>
-                PREFIX wdv: <http://www.wikidata.org/value/>
-                PREFIX wdt: <http://www.wikidata.org/prop/direct/>
-                PREFIX wikibase: <http://wikiba.se/ontology#>
-                PREFIX p: <http://www.wikidata.org/prop/>
-                PREFIX ps: <http://www.wikidata.org/prop/statement/>
-                PREFIX pq: <http://www.wikidata.org/prop/qualifier/>
-                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-                PREFIX bd: <http://www.bigdata.com/rdf#>
+                PREFIX bd: <http://www.bigdata.com/rdf#> 
+                PREFIX dct: <http://purl.org/dc/terms/> 
+                PREFIX geo: <http://www.opengis.net/ont/geosparql#> 
+                PREFIX p: <http://www.wikidata.org/prop/> 
+                PREFIX pq: <http://www.wikidata.org/prop/qualifier/> 
+                PREFIX ps: <http://www.wikidata.org/prop/statement/> 
+                PREFIX psn: <http://www.wikidata.org/prop/statement/value-normalized/> 
+                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+                PREFIX wd: <http://www.wikidata.org/entity/> 
+                PREFIX wds: <http://www.wikidata.org/entity/statement/> 
+                PREFIX wdt: <http://www.wikidata.org/prop/direct/> 
+                PREFIX wdv: <http://www.wikidata.org/value/> 
+                PREFIX wikibase: <http://wikiba.se/ontology#> 
+                PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
                 """
-        lcquad_data = json.load(open(path_to_ds+"/lcquad.json"))
+        lcquad_data = json.load(open(path_to_ds+"/qald.json"))
         samples = []
         for question in tqdm(lcquad_data):
             # print(question)
-            if "entities" in question and "relations" in question and question["question"] is not None:
+            if "entities" in question  and question["question"] is not None:
                 question_str = question["question"]+"[SEP] "
                 entities=question["entities"]
                 for ent in entities:
@@ -473,7 +477,8 @@ class Dataprocessor_Combined_entities(Dataprocessor_KBQA_basic):
                 samples.append(sample)
 
         grail_qa = json.load(open(path_to_ds+"/grail.json"))
-
+        num_samples_wk=len(samples)
+        curr_add=0
         for el in tqdm(grail_qa):
             question_str = el["question"]+"[SEP] "
             nodes=el["graph_query"]["nodes"]
@@ -536,7 +541,9 @@ class Dataprocessor_Combined_entities(Dataprocessor_KBQA_basic):
             sample = {"input": question_str+"[SEP]target_freebase", "label": query}
 
             samples.append(sample)
-
+            curr_add+=1
+            if curr_add==num_samples_wk:
+                break
         return samples
 
 class Dataprocessor_QALD(Dataprocessor_KBQA_basic):
