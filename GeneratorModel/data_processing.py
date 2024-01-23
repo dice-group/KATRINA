@@ -507,7 +507,7 @@ class Dataprocessor_Combined_entities(Dataprocessor_KBQA_basic):
             query = el["sparql_query"]
             nodes = el["graph_query"]["nodes"]
             edges = el["graph_query"]["edges"]
-            query=preprocessfreebasequery(query)
+            #query=preprocessfreebasequery(query)
             parsed_query = sparql.parser.parseQuery(query)
 
             en = algebra.translateQuery(parsed_query)
@@ -544,6 +544,130 @@ class Dataprocessor_Combined_entities(Dataprocessor_KBQA_basic):
             curr_add+=1
             if curr_add==num_samples_wk:
                 break
+        return samples
+
+class Dataprocessor_Combined_entities_relations(Dataprocessor_KBQA_basic):
+    def read_ds_to_list(self, path_to_ds):
+        prefixes = """
+                PREFIX bd: <http://www.bigdata.com/rdf#> 
+                PREFIX dct: <http://purl.org/dc/terms/> 
+                PREFIX geo: <http://www.opengis.net/ont/geosparql#> 
+                PREFIX p: <http://www.wikidata.org/prop/> 
+                PREFIX pq: <http://www.wikidata.org/prop/qualifier/> 
+                PREFIX ps: <http://www.wikidata.org/prop/statement/> 
+                PREFIX psn: <http://www.wikidata.org/prop/statement/value-normalized/> 
+                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+                PREFIX wd: <http://www.wikidata.org/entity/> 
+                PREFIX wds: <http://www.wikidata.org/entity/statement/> 
+                PREFIX wdt: <http://www.wikidata.org/prop/direct/> 
+                PREFIX wdv: <http://www.wikidata.org/value/> 
+                PREFIX wikibase: <http://wikiba.se/ontology#> 
+                PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+                """
+        lcquad_data = json.load(open(path_to_ds+"/lcquad.json"))
+        samples = []
+        for question in tqdm(lcquad_data):
+            # print(question)
+            if "entities" in question  and question["question"] is not None:
+                question_str = question["question"]+"[SEP] "
+                entities=question["entities"]
+                for ent in entities:
+                    question_str+=ent["label"]+" : "+ent["uri"].replace("http://www.wikidata.org/entity/","")+" , "
+                question_str=question_str+"[SEP]"
+                relations = question["relations"]
+                for rel in relations:
+                    question_str+=rel["label"]+ " : "+ rel["uri"].replace("http://www.wikidata.org/prop/direct/","") + " , "
+                query = question["sparql_wikidata"]
+                parsed_query = sparql.parser.parseQuery(prefixes+query)
+                en = algebra.translateQuery(parsed_query)
+                '''
+                for ent in question["entities"]:
+                    key = ent["uri"].replace("http://www.wikidata.org/entity/", "")
+                    query = query.replace(key, ent["label"])
+                for rel in question["relations"]:
+                    key = rel["uri"].replace("http://www.wikidata.org/prop/direct/", "")
+                    query = query.replace(key, rel["label"])
+                '''
+                res_vars = en.algebra["PV"]
+                vars = en.algebra["_vars"]
+                it = 0
+
+                for el in res_vars:
+                    query = query.replace("?" + el, "_result_" + str(it))
+                    it += 1
+                it = 0
+                for el in vars:
+                    query = query.replace("?" + el, "_var_" + str(it))
+                    it += 1
+                query = query.replace("{", "_cbo_")
+                query = query.replace("}", "_cbc_")
+                sample = {"input": question_str+"[SEP]target_wikidata", "label": query}
+                samples.append(sample)
+
+        grail_qa = json.load(open(path_to_ds+"/grail.json"))
+        for el in tqdm(grail_qa):
+            question_str = el["question"]+"[SEP] "
+            nodes=el["graph_query"]["nodes"]
+            for n in nodes:
+                if not n["node_type"] == "literal":
+                    question_str += n["friendly_name"] + " : " + n["id"]+ " , "
+            edges = el["graph_query"]["edges"]
+            question_str=question_str+"[SEP]"
+            for e in edges:
+                question_str += e["friendly_name"] + " : " + e["relation"] + " , "
+            def preprocessfreebasequery(query_str):
+                processed_query=""
+                #print(query_str)
+                query_split=query_str.split("\n")
+                values={}
+                for el in query_split:
+                    if "VALUES" in el:
+                        key=el[len("VALUES "):el.index("{")-1]
+                        value=el[el.index("{")+2:el.index("}")+-1]
+                        values[key]=value
+                    elif not "FILTER" in el:
+                        processed_query+=el
+                for k in values.keys():
+                    processed_query = processed_query.replace(k,values[k])
+                return processed_query
+
+            query = el["sparql_query"]
+            nodes = el["graph_query"]["nodes"]
+            edges = el["graph_query"]["edges"]
+            #query=preprocessfreebasequery(query)
+            parsed_query = sparql.parser.parseQuery(query)
+
+            en = algebra.translateQuery(parsed_query)
+
+            '''
+            for e in edges:
+                query = query.replace(e["relation"], e["friendly_name"])
+            for n in nodes:
+                query = query.replace(n["id"], n["friendly_name"])
+            '''
+            query = query.replace("\n", "")
+            query = query.replace("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>", "")
+            query = query.replace(
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>", "")
+            query = query.replace(
+                "PREFIX : <http://rdf.freebase.com/ns/> ", "")
+
+            res_vars = en.algebra["PV"]
+            vars = en.algebra["_vars"]
+            it = 0
+
+            for el in res_vars:
+                query = query.replace("?" + el, "_result_" + str(it))
+                it += 1
+            it = 0
+            for el in vars:
+                query = query.replace("?" + el, "_var_" + str(it))
+                it += 1
+            query = query.replace("{", "_cbo_")
+            query = query.replace("}", "_cbc_")
+            sample = {"input": question_str+"[SEP]target_freebase", "label": query}
+
+            samples.append(sample)
         return samples
 
 class Dataprocessor_QALD(Dataprocessor_KBQA_basic):
