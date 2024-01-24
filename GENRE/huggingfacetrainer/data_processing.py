@@ -51,6 +51,8 @@ class Dataprocessor_KBQA_basic(Dataprocessor):
         samples=[]
         return samples
     def process_sample(self,input,label=None):
+        test= self.tokenizer.tokenize(input)
+        ltest=self.tokenizer.tokenize(label)
         encoding = self.tokenizer.prepare_seq2seq_batch(src_texts=[input],text_target=[label], return_tensors="pt",
                         max_length=self.args["max_target_length"],
                         max_target_length=self.args["max_target_length"]
@@ -104,6 +106,7 @@ class Dataprocessor_Combined_simple(Dataprocessor_KBQA_basic):
         lcquad_data = json.load(open(path_to_ds+"/lcquad.json"))
         entitylabels_alt = pickle.load(open("../GENRE/alt_dict_wikidata.pkl", "rb"))
         samples=[]
+        '''
         for question in tqdm(lcquad_data):
             # print(question)
             if "entities" in question and "relations" in question and question["question"] is not None:
@@ -122,6 +125,7 @@ class Dataprocessor_Combined_simple(Dataprocessor_KBQA_basic):
                                                " [START_ENT] "+alt +
                                                " [END_ENT] [SEP]target_wikidata" , "label": entitylabels_alt[key]["label"]}
                             samples.append(sample)
+        '''
         grail_qa = json.load(open(path_to_ds+"/grail.json"))
         entitylabels = pickle.load(open("../GENRE/label_dict_freebase.pkl", "rb"))
         entitylabels_alt = pickle.load(open("../GENRE/alt_dict_freebase.pkl", "rb"))
@@ -143,6 +147,58 @@ class Dataprocessor_Combined_simple(Dataprocessor_KBQA_basic):
                             samples.append(sample)
 
         return samples
+
+class Dataprocessor_Grail_Types(Dataprocessor_KBQA_basic):
+    def read_ds_to_list(self, path_to_ds):
+        prefixes = """
+                PREFIX wd: <http://www.wikidata.org/entity/>
+                PREFIX wds: <http://www.wikidata.org/entity/statement/>
+                PREFIX wdv: <http://www.wikidata.org/value/>
+                PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+                PREFIX wikibase: <http://wikiba.se/ontology#>
+                PREFIX p: <http://www.wikidata.org/prop/>
+                PREFIX ps: <http://www.wikidata.org/prop/statement/>
+                PREFIX pq: <http://www.wikidata.org/prop/qualifier/>
+                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                PREFIX bd: <http://www.bigdata.com/rdf#>
+                """
+        lcquad_data = json.load(open(path_to_ds+"/lcquad.json"))
+        entitylabels_alt = pickle.load(open("../alt_dict_wikidata.pkl", "rb"))
+        samples=[]
+        '''
+        for question in tqdm(lcquad_data):
+            # print(question)
+            if "entities" in question and "relations" in question and question["question"] is not None:
+                question_str = question["question"]
+                query = question["sparql_wikidata"]
+                for ent in question["entities"]:
+                    key = ent["uri"].replace("http://www.wikidata.org/entity/", "")
+                    if key in entitylabels_alt:
+                        #ent_str+=entitylabels[key]+", "
+                        sample = {"input": question_str+"[START_ENT]"+entitylabels_alt[key]["label"]+
+                                           "[END_ENT] [SEP]target_wikidata", "label": entitylabels_alt[key]["label"]}
+                        samples.append(sample)
+                    if "alternatives" in entitylabels_alt[key]:
+                        for alt in entitylabels_alt[key]["alternatives"]:
+                            sample = {"input": question_str +
+                                               " [START_ENT] "+alt +
+                                               " [END_ENT] [SEP]target_wikidata" , "label": entitylabels_alt[key]["label"]}
+                            samples.append(sample)
+        '''
+        grail_qa = json.load(open(path_to_ds+"/grail.json"))
+        entitylabels = pickle.load(open("../label_dict_freebase.pkl", "rb"))
+        entitylabels_alt = pickle.load(open("../alt_dict_freebase.pkl", "rb"))
+        #print(list(entitylabels.keys()))
+        for el in tqdm(grail_qa):
+            question_str = el["question"]
+            nodes = el["graph_query"]["nodes"]
+            for n in nodes:
+                if n["node_type"] == "class":
+                    sample = {"input": question_str, "label": n["friendly_name"]}
+                    samples.append(sample)
+
+        return samples
+
 class Dataprocessor_QALD(Dataprocessor_KBQA_basic):
     def read_ds_to_list(self,path_to_ds):
         samples=[]

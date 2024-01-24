@@ -3,7 +3,7 @@ from parameters import GenreParser
 from typing import Callable, Dict, List, Optional, Tuple, Iterable
 import numpy as np
 import os
-from data_processing import ListDataset, Dataprocessor_Combined_simple
+from data_processing import ListDataset, Dataprocessor_Combined_simple,Dataprocessor_Grail_Types
 from transformers import Trainer
 from transformers import (
     AutoConfig,
@@ -104,7 +104,7 @@ def main():
         # compute_metrics_fn = summarization_metrics if "summarization" in task_name else translation_metrics
         compute_metrics_fn = exact_match_metrics
         return compute_metrics_fn
-    dg=Dataprocessor_Combined_simple(tokenizer, params)
+    dg=Dataprocessor_Grail_Types(tokenizer, params)
 
     # Get datasets
     if params["train_model"]:
