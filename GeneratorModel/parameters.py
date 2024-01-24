@@ -80,7 +80,7 @@ class KATRINAParser(argparse.ArgumentParser):
 
         parser.add_argument(
             "--model_name",
-            default="t5-large",
+            default="t5-base",
             type=str,
             help="path or name of model",
         )

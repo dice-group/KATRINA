@@ -4,9 +4,10 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 
-
+from tqdm import tqdm
 from typing import Dict, List
-
+import sys
+sys. setrecursionlimit(2000)
 try:
     import marisa_trie
 except ModuleNotFoundError:
@@ -60,6 +61,30 @@ class Trie(object):
         append_trie=None,
         bos_token_id: int = None,
     ):
+        while len(prefix_sequence)>0 and prefix_sequence[0] in trie_dict:
+            trie_dict = trie_dict[prefix_sequence[0]]
+            prefix_sequence=prefix_sequence[1:]
+
+        if len(prefix_sequence) == 0:
+            output = list(trie_dict.keys())
+            if append_trie and bos_token_id in output:
+                output.remove(bos_token_id)
+                output += list(append_trie.trie_dict.keys())
+            return output
+
+        else:
+            if append_trie:
+                return append_trie.get(prefix_sequence)
+            else:
+                return []
+    '''        
+    @staticmethod
+    def _get_from_trie(
+        prefix_sequence: List[int],
+        trie_dict: Dict,
+        append_trie=None,
+        bos_token_id: int = None,
+    ):
         if len(prefix_sequence) == 0:
             output = list(trie_dict.keys())
             if append_trie and bos_token_id in output:
@@ -78,7 +103,7 @@ class Trie(object):
                 return append_trie.get(prefix_sequence)
             else:
                 return []
-
+'''
     def __iter__(self):
         def _traverse(prefix_sequence, trie_dict):
             if trie_dict:
@@ -96,6 +121,40 @@ class Trie(object):
 
     def __getitem__(self, value):
         return self.get(value)
+
+class Trie_not_recursive(Trie):
+
+    @staticmethod
+    def _add_to_trie(sequence: List[int], trie_dict: Dict):
+        while len(sequence)>0:
+            if sequence[0] not in trie_dict:
+                trie_dict[sequence[0]] = {}
+            sequence=sequence[1:]
+            trie_dict=trie_dict[sequence[0]]
+            Trie._add_to_trie(sequence[1:], trie_dict[sequence[0]])
+    @staticmethod
+    def _get_from_trie(
+        prefix_sequence: List[int],
+        trie_dict: Dict,
+        append_trie=None,
+        bos_token_id: int = None,
+    ):
+        while len(prefix_sequence)>0 and prefix_sequence[0] in trie_dict:
+            trie_dict = trie_dict[prefix_sequence[0]]
+            prefix_sequence=prefix_sequence[1:]
+
+        if len(prefix_sequence) == 0:
+            output = list(trie_dict.keys())
+            if append_trie and bos_token_id in output:
+                output.remove(bos_token_id)
+                output += list(append_trie.trie_dict.keys())
+            return output
+
+        else:
+            if append_trie:
+                return append_trie.get(prefix_sequence)
+            else:
+                return []
 
 
 class MarisaTrie(object):
@@ -116,13 +175,29 @@ class MarisaTrie(object):
         self.cache_fist_branch = cache_fist_branch
         if self.cache_fist_branch:
             self.zero_iter = list({sequence[0] for sequence in sequences})
-            assert len(self.zero_iter) == 1
+            #assert len(self.zero_iter) == 1
             self.first_iter = list({sequence[1] for sequence in sequences})
 
         self.trie = marisa_trie.Trie(
             "".join([self.int2char[i] for i in sequence]) for sequence in sequences
         )
 
+    def generatecache(self,model,labels):
+        self.zero_iter=set()
+        self.first_iter = set()
+        for label in tqdm(labels):
+            seq=[2]+model.encode(label).tolist()[1:]
+            self.zero_iter.add(seq[0])
+            self.first_iter.add(seq[1])
+        self.zero_iter=list(self.zero_iter)
+        assert len(self.zero_iter) == 1
+        self.first_iter = list(self.first_iter)
+    def generate_onfly(self, model, labels):
+
+
+        self.trie = marisa_trie.Trie(
+            "".join([self.int2char[i] for i in [2]+model.encode(label).tolist()[1:]]) for label in labels
+        )
     def get(self, prefix_sequence: List[int]):
         if self.cache_fist_branch and len(prefix_sequence) == 0:
             return self.zero_iter
@@ -134,6 +209,12 @@ class MarisaTrie(object):
             return self.first_iter
         else:
             key = "".join([self.int2char[i] for i in prefix_sequence])
+            el=list(
+                {
+                    self.char2int[e[len(key)]]
+                    for e in self.trie.keys(key)
+                    if len(e) > len(key)
+                })
             return list(
                 {
                     self.char2int[e[len(key)]]
@@ -151,6 +232,8 @@ class MarisaTrie(object):
 
     def __getitem__(self, value):
         return self.get(value)
+
+
 
 
 class DummyTrieMention(object):
