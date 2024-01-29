@@ -440,7 +440,7 @@ class Dataprocessor_Combined_entities(Dataprocessor_KBQA_basic):
                 PREFIX wikibase: <http://wikiba.se/ontology#> 
                 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
                 """
-        lcquad_data = json.load(open(path_to_ds+"/qald.json"))
+        lcquad_data = json.load(open(path_to_ds+"/lcquad.json"))
         samples = []
         for question in tqdm(lcquad_data):
             # print(question)
@@ -478,7 +478,6 @@ class Dataprocessor_Combined_entities(Dataprocessor_KBQA_basic):
 
         grail_qa = json.load(open(path_to_ds+"/grail.json"))
         num_samples_wk=len(samples)
-        curr_add=0
         for el in tqdm(grail_qa):
             question_str = el["question"]+"[SEP] "
             nodes=el["graph_query"]["nodes"]
@@ -541,9 +540,6 @@ class Dataprocessor_Combined_entities(Dataprocessor_KBQA_basic):
             sample = {"input": question_str+"[SEP]target_freebase", "label": query}
 
             samples.append(sample)
-            curr_add+=1
-            if curr_add==num_samples_wk:
-                break
         return samples
 
 class Dataprocessor_Combined_entities_relations(Dataprocessor_KBQA_basic):
