@@ -101,7 +101,7 @@ def main():
         # compute_metrics_fn = summarization_metrics if "summarization" in task_name else translation_metrics
         compute_metrics_fn = exact_match_metrics
         return compute_metrics_fn
-    dg=Dataprocessor_Combined_entities_relations(tokenizer, params)
+    dg=Dataprocessor_Combined_entities(tokenizer, params)
 
     # Get datasets
     if params["train_model"]:
