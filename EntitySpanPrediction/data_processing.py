@@ -273,6 +273,7 @@ class Dataprocessor_Combined(Dataprocessor_KBQA_basic):
                 sample = {"input": question_str, "label": query}
                 samples.append(sample)
 
+        '''
         grail_qa = json.load(open(path_to_ds+"/grail.json"))
         for el in tqdm(grail_qa):
             question_str = el["question"]
@@ -309,7 +310,7 @@ class Dataprocessor_Combined(Dataprocessor_KBQA_basic):
             sample = {"input": question_str, "label": query}
 
             samples.append(sample)
-
+        '''
         return samples
 
 
@@ -363,6 +364,61 @@ class Dataprocessor_Combined_simple(Dataprocessor_KBQA_basic):
             samples.append(sample)
 
         return samples
+
+class Dataprocessor_Combined_simple_relations(Dataprocessor_KBQA_basic):
+    def read_ds_to_list(self, path_to_ds):
+        prefixes = """
+                PREFIX wd: <http://www.wikidata.org/entity/>
+                PREFIX wds: <http://www.wikidata.org/entity/statement/>
+                PREFIX wdv: <http://www.wikidata.org/value/>
+                PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+                PREFIX wikibase: <http://wikiba.se/ontology#>
+                PREFIX p: <http://www.wikidata.org/prop/>
+                PREFIX ps: <http://www.wikidata.org/prop/statement/>
+                PREFIX pq: <http://www.wikidata.org/prop/qualifier/>
+                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                PREFIX bd: <http://www.bigdata.com/rdf#>
+                """
+        lcquad_data = json.load(open(path_to_ds+"/lcquad.json"))
+        #entitylabels = pickle.load(open("../precomputed/wikidata_labels.sav", "rb"))
+        samples=[]
+        for question in tqdm(lcquad_data):
+            # print(question)
+            if "entities" in question and "relations" in question and question["question"] is not None:
+                question_str = question["question"]
+                query = question["sparql_wikidata"]
+                parsed_query = sparql.parser.parseQuery(prefixes+query)
+                en = algebra.translateQuery(parsed_query)
+                ent_str="entities: "
+                for ent in question["entities"]:
+                    ent_str+=ent["label"]+" , "
+                    #key = ent["uri"].replace("http://www.wikidata.org/entity/", "")
+                    #if key in entitylabels:
+                    #    ent_str+=entitylabels[key]+", "
+                rel_str = "relations: "
+                for ent in question["relations"]:
+                    rel_str+=ent["label"]+" , "
+                sample = {"input": question_str+"[SEP]target_wikidata", "label": question_str+" "+ent_str+" "+rel_str}
+                samples.append(sample)
+
+        #grail_qa = json.load(open(path_to_ds+"/grail.json"))
+
+        '''
+        for el in tqdm(grail_qa):
+            question_str = el["question"]
+            target = el["question"] + "[SEP] "
+            nodes = el["graph_query"]["nodes"]
+            ent_str = "entities:"
+            for n in nodes:
+                if not n["node_type"] == "literal":
+                    ent_str += n["friendly_name"] + " , "
+
+            sample = {"input": question_str+"[SEP]target_freebase", "label": question_str+" "+ent_str}
+
+            samples.append(sample)
+        '''
+        return samples
+
 class Dataprocessor_QALD(Dataprocessor_KBQA_basic):
     def read_ds_to_list(self,path_to_ds):
         samples=[]
