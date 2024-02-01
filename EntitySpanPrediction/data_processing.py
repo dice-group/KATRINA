@@ -391,13 +391,13 @@ class Dataprocessor_Combined_simple_relations(Dataprocessor_KBQA_basic):
                 en = algebra.translateQuery(parsed_query)
                 ent_str="entities: "
                 for ent in question["entities"]:
-                    ent_str+=ent["label"]+" , "
+                    ent_str+="[ENT]"+ent["label"]+" , "
                     #key = ent["uri"].replace("http://www.wikidata.org/entity/", "")
                     #if key in entitylabels:
                     #    ent_str+=entitylabels[key]+", "
                 rel_str = "relations: "
                 for ent in question["relations"]:
-                    rel_str+=ent["label"]+" , "
+                    rel_str+="[ENT]"+ent["label"]+" , "
                 sample = {"input": question_str+"[SEP]target_wikidata", "label": question_str+" "+ent_str+" "+rel_str}
                 samples.append(sample)
 
