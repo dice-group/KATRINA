@@ -13,7 +13,7 @@ mod=EntityAndRelationDetector(params)
 #print(mod.predict("Who is the eponym of Lake Eyre that also is the winner of the Founder's Medal?"))
 data=json.load(open(params["predict_file"],"r",encoding="utf-8"))
 for question in tqdm(data):
-    if "question"in question:
+    if "question"in question and question["question"] is not None:
         ent,rel=mod.predict(question["question"])
         question["entities"]=ent
         question["relations"]=rel
