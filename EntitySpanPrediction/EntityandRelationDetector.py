@@ -59,19 +59,3 @@ class EntityAndRelationDetector():
             all_relations=[]
         return [{"label":el,"uri":self.entities[el]}for el in all_ents if el in self.entities],\
                [{"label":el,"uri":self.relations[el]}for el in all_relations if el in self.relations]
-parser = KATRINAParser(add_model_args=True,add_training_args=True)
-parser.add_model_args()
-parser.add_inference_args()
-# args = argparse.Namespace(**params)
-args = parser.parse_args()
-print(args)
-params = args.__dict__
-mod=EntityAndRelationDetector(params)
-#print(mod.predict("Who is the eponym of Lake Eyre that also is the winner of the Founder's Medal?"))
-data=json.load(open("../qa-data/LCQUAD/test.json","r",encoding="utf-8"))
-for question in tqdm(data):
-    if "question"in question:
-        ent,rel=mod.predict(question["question"])
-        question["entities"]=ent
-        question["relations"]=rel
-json.dump(data,open("../qa-data/LCQUAD/test_pred_resource.json","r",encoding="utf-8"))
