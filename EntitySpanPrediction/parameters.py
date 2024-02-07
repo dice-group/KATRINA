@@ -8,15 +8,18 @@ class KATRINAParser(argparse.ArgumentParser):
     More options can be added specific by paassing this object and calling
     ''add_arg()'' or add_argument'' on it.
 
-    :param add_blink_args:
-        (default True) initializes the default arguments for BLINK package.
+    :param add_training_args:
+        (default False) initializes the default arguments for model training
     :param add_model_args:
         (default False) initializes the default arguments for loading models,
         including initializing arguments from the model.
+    :param add_inference_args:
+        (default False) initializes the default arguments for inference,
+        including prefix tries.
     """
 
     def __init__(
-        self, add_training_args=False, add_model_args=False,
+        self, add_training_args=False, add_model_args=False,add_inference_args=False,
         description=' ',
     ):
         super().__init__(
@@ -25,10 +28,6 @@ class KATRINAParser(argparse.ArgumentParser):
             conflict_handler='resolve',
             formatter_class=argparse.HelpFormatter,
         )
-        self.blink_home = os.path.dirname(
-            os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-        )
-        os.environ['BLINK_HOME'] = self.blink_home
 
         self.add_arg = self.add_argument
 
@@ -38,6 +37,8 @@ class KATRINAParser(argparse.ArgumentParser):
             self.add_model_args()
         if add_training_args:
             self.add_training_args()
+        if add_inference_args:
+            self.add_inference_args()
     def add_model_args(self, args=None):
         """
         Add model args.
@@ -45,7 +46,7 @@ class KATRINAParser(argparse.ArgumentParser):
         parser = self.add_argument_group("Model Arguments")
         parser.add_argument(
             "--max_input_length",
-            default=128,
+            default=512,
             type=int,
             help="The maximum total input sequence length after WordPiece tokenization. \n"
             "Sequences longer than this will be truncated, and sequences shorter \n"
@@ -53,7 +54,7 @@ class KATRINAParser(argparse.ArgumentParser):
         )
         parser.add_argument(
             "--max_target_length",
-            default=128,
+            default=512,
             type=int,
             help="The maximum total input sequence length after WordPiece tokenization. \n"
                  "Sequences longer than this will be truncated, and sequences shorter \n"
@@ -80,7 +81,7 @@ class KATRINAParser(argparse.ArgumentParser):
 
         parser.add_argument(
             "--model_name",
-            default="t5-small",
+            default="t5-base",
             type=str,
             help="path or name of model",
         )
@@ -144,4 +145,60 @@ class KATRINAParser(argparse.ArgumentParser):
             default="../qa-data/combined/test",
             type=str,
             help="Path to training data",
+        )
+    def add_inference_args(self,args=None):
+        parser = self.add_argument_group("Model Arguments")
+        parser.add_argument(
+            "--entity_trie_file",
+            default="precomputed/EntityLinking/entity_trie_alt.pkl",
+            type=str,
+            help="Entity Trie File",
+        )
+        parser.add_argument(
+            "--entity_dict_file",
+            default="precomputed/EntityLinking/entity_dict_alt.pkl",
+            type=str,
+            help="Entity Dictionary File",
+        )
+        parser.add_argument(
+            "--relation_trie_file",
+            default="precomputed/EntityLinking/relation_trie.pkl",
+            type=str,
+            help="Relation Trie File",
+        )
+        parser.add_argument(
+            "--relation_dict_file",
+            default="precomputed/EntityLinking/relation_dict.pkl",
+            type=str,
+            help="Relation Dict File",
+        )
+        parser.add_argument(
+            "--pretrained_model_path",
+            default="precomputed/EntityLinking/span_model",
+            type=str,
+            help="Path to pretrained model"
+        )
+        parser.add_argument(
+            "--cuda_device_id",
+            default=0,
+            type=int,
+            help="id of cuda device to use"
+        )
+        parser.add_argument(
+            "--parameter_path_prefix",
+            default="",
+            type=str,
+            help="optional to add for each path parameter"
+        )
+        parser.add_argument(
+            "--predict_file",
+            default="input_file",
+            type=str,
+            help="lcquad_fomated_file_to_predict_resources_for"
+        )
+        parser.add_argument(
+            "--output_file",
+            default="output_file",
+            type=str,
+            help="file_to_write"
         )
