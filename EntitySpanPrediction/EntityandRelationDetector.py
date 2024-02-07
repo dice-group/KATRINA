@@ -1,6 +1,6 @@
 from parameters import KATRINAParser
 from transformers import T5Tokenizer, T5ForConditionalGeneration
-from GeneratorModel.data_processing import Dataprocessor_test
+from data_processing import Dataprocessor_test
 from PrefixTrie import Trie_not_recursive
 import json
 import torch
