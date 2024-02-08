@@ -48,14 +48,13 @@ class EntityAndRelationDetector():
         out = self.model.generate(input_ids=i.to(self.device), max_length=650, prefix_allowed_tokens_fn=self.prefix_allowed_tokens_fn)
         out_str=self.tokenizer.decode(out[0], skip_special_tokens=True)
         # print(out_str)
-        if "relations"in out_str:
+        try:
             entstr=out_str[out_str.index("entities: ")+len("entities: "):out_str.index(", relations")]
             all_ents=[el.replace("[BEG]","").replace("[END]","")for el in entstr.split("[END], [BEG]")]
             relations_str = out_str[out_str.index("relations: ") + len("relations: "):-1]
             all_relations = [el.replace("[BEG]","").replace("[END]","")for el in relations_str.split("[END], [BEG]")]
-        else:
-            entstr = out_str[out_str.index("entities: ") + len("entities: "):]
-            all_ents = [el.replace("[BEG]", "").replace("[END]", "") for el in entstr.split("[END], [BEG]")]
+        except ValueError:
+            all_ents=[]
             all_relations=[]
         return [{"label":el,"uri":self.entities[el]}for el in all_ents if el in self.entities],\
                [{"label":el,"uri":self.relations[el]}for el in all_relations if el in self.relations]
