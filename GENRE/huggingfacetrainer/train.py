@@ -46,7 +46,7 @@ def main():
         params["tokenizer_name"] if params["tokenizer_name"] is not None else params["model_name"],
         cache_dir=params["cache_dir"],
     )'''
-    model=genre_hf.from_pretrained("../GENRE/hf_entity_disambiguation_aidayago")
+    model=genre_hf.from_pretrained("../hf_entity_disambiguation_aidayago")
     tokenizer=model.tokenizer
     '''model = AutoModelForSeq2SeqLM.from_pretrained(
         params["model_name"],

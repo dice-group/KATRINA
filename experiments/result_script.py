@@ -76,11 +76,11 @@ def freebase_resource_generator(add_entities=True,add_relations=True):
     def add_resources_freebase(question):
         input = question["question"][0]["string"] + "[SEP] "
         question_id = question["id"]
-        if add_entities and question_id in grail_ent:
-            entities = grail_ent[question_id]["entities"]
+        if add_entities and str(question_id) in grail_ent:
+            entities = grail_ent[str(question_id)]["entities"]
             input += "entities: "
             for ent in list(entities.keys()):
-                input += ent["friendly_name"] + " : " + ent + " , "
+                input += entities[ent]["friendly_name"] + " : " + ent + " , "
             if ques["id"] in ent_schema:
                 nodes = ent_schema[question_id]["classes"][:3]
                 for n in nodes:
