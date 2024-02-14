@@ -156,7 +156,7 @@ class KATRINAParser(argparse.ArgumentParser):
         )
         parser.add_argument(
             "--entity_dict_file",
-            default="precomputed/EntityLinking/entity_dict_alt.pkl",
+            default="precomputed/EntityLinking/entity_dict_update.pkl",
             type=str,
             help="Entity Dictionary File",
         )
