@@ -40,7 +40,7 @@ def get_answer_generator(params):
 
         except:
             print("FAILED"+query_str)
-            return {'head': {'vars': 'result'}, 'results': {'bindings': []}}
+            return {'head': {'vars': ['result']}, 'results': {'bindings': []}}
     def get_answers_freebase(query_str):
         prefixes="PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX : <http://rdf.freebase.com/ns/> "
         try:
@@ -54,7 +54,8 @@ def get_answer_generator(params):
 
         except:
             print("FAILED"+query_str)
-        return {'head': {'vars': 'result'}, 'results': {'bindings': []}}
+        return {'head': {'vars': ['result']}, 'results': {'bindings': []}}
+
     if params["benchmark_KG"]=="wikidata":
         return get_answers_wikidata
     else:
@@ -148,5 +149,5 @@ for ques in data["questions"]:
             print(answers)
             ques["answers"]=[answers]
     else:
-        ques["answers"]={'head': {'vars': 'result'}, 'results': {'bindings': []}}
+        ques["answers"]=[{'head': {'vars': ['result']}, 'results': {'bindings': []}}]
 json.dump(data,open(params["output_file"],"w",encoding="utf-8"))
