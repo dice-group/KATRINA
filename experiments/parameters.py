@@ -145,6 +145,18 @@ class KATRINAParser(argparse.ArgumentParser):
             type=str,
             help="freebase type dict"
         )
+        parser.add_argument(
+            "--use_gold_res_freebase",
+            default=False,
+            type=bool,
+            help="configure if gold resources should be used in freebase evaluation"
+        )
+        parser.add_argument(
+            "--gold_resource_benchmark",
+            default="../qa-data/GrailQA_v1.0/grailqa_v1.0_dev.json",
+            type=str,
+            help="benchmark with gold entities"
+        )
 
         parser.add_argument(
             "--freebase_relation_dict",

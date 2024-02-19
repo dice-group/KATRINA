@@ -61,19 +61,31 @@ def get_answer_generator(params):
     else:
         return get_answers_freebase
 
-def freebase_resource_generator(add_entities=True,add_relations=True):
-    with(open(params["freebase_qa_schema_file"], "r")) as file:
-        ent_schema = {}
-        for ln in file:
-            el = json.loads(ln)
-            ent_schema[el["qid"]] = el
-    with(open(params["freebase_qa_entity_file"], "r")) as file:
-        grail_ent = json.load(file)
-    with(open(params["freebase_type_dict"], "rb")) as file:
-        freebase_types = pickle.load(file)
-    with(open(params["freebase_relation_dict"], "rb")) as file:
-        freebase_relations = pickle.load(file)
+def freebase_resource_generator(add_entities=True,add_relations=True,use_gold_resources=False):
 
+    if use_gold_resources:
+        with(open(params["gold_resource_benchmark"]))as file:
+            ent_data=json.load(file)
+            enitity_map = {}
+            relation_map= {}
+            for ques in ent_data:
+                id = ques["qid"]
+                entities = ques["graph_query"]["nodes"]
+                enitity_map[id] = entities
+                relations=ques["graph_query"]["edges"]
+                relation_map[id] = relations
+    else:
+        with(open(params["freebase_qa_schema_file"], "r")) as file:
+            ent_schema = {}
+            for ln in file:
+                el = json.loads(ln)
+                ent_schema[el["qid"]] = el
+        with(open(params["freebase_qa_entity_file"], "r")) as file:
+            grail_ent = json.load(file)
+        with(open(params["freebase_type_dict"], "rb")) as file:
+            freebase_types = pickle.load(file)
+        with(open(params["freebase_relation_dict"], "rb")) as file:
+            freebase_relations = pickle.load(file)
     def add_resources_freebase(question):
         input = question["question"][0]["string"] + "[SEP] "
         question_id = question["id"]
@@ -86,14 +98,35 @@ def freebase_resource_generator(add_entities=True,add_relations=True):
                 nodes = ent_schema[question_id]["classes"][:3]
                 for n in nodes:
                     input +=freebase_types[n] + " : " + n + " , "
-        input += "relations: "
         if add_relations and question_id in ent_schema:
+            input += "relations: "
             if ques["id"] in ent_schema:
                 nodes = ent_schema[question_id]["relations"][:3]
                 for n in nodes:
                     input +=freebase_relations[n] + " : " + n + " , "
         return input+"[SEP]target_freebase"
-    return add_resources_freebase
+    def add_resources_freebase_gold(question):
+        input = question["question"][0]["string"] + "[SEP] "
+        question_id = question["id"]
+
+        if add_entities and str(question_id) in enitity_map:
+            input += "entities: "
+            nodes = enitity_map[str(question_id)]
+            for n in nodes:
+                if not n["node_type"] == "literal":
+                    input += n["friendly_name"] + " : " + n["id"] + " , "
+
+        if add_relations and  str(question_id) in relation_map:
+            input += "relations: "
+            if ques["id"] in ent_schema:
+                edges = relation_map[str(question_id)]
+                for e in edges:
+                    input += e["friendly_name"] + " : " + e["relation"] + " , "
+        return input+"[SEP]target_freebase"
+    if use_gold_resources:
+        return add_resources_freebase_gold
+    else:
+        return add_resources_freebase
 
 def wikidata_resource_generater(add_entities=True,add_relations=True):
     ent_data = json.load(open(params["wikidata_bechmark_entities"], "r", encoding="utf-8"))
@@ -125,7 +158,10 @@ def wikidata_resource_generater(add_entities=True,add_relations=True):
 if params["benchmark_KG"]=="wikidata":
     resource_predicor = wikidata_resource_generater(params["use_entities"], params["use_relations"])
 else:
-    resource_predicor = freebase_resource_generator(params["use_entities"], params["use_relations"])
+    if params["use_gold_res_freebase"]:
+        resource_predicor = freebase_resource_generator(params["use_entities"], params["use_relations"],True)
+    else:
+        resource_predicor = freebase_resource_generator(params["use_entities"], params["use_relations"])
 answer_generator =get_answer_generator(params)
 
 for ques in data["questions"]:
