@@ -109,17 +109,17 @@ def freebase_resource_generator(add_entities=True,add_relations=True,use_gold_re
         input = question["question"][0]["string"] + "[SEP] "
         question_id = question["id"]
 
-        if add_entities and str(question_id) in enitity_map:
+        if add_entities and question_id in enitity_map:
             input += "entities: "
-            nodes = enitity_map[str(question_id)]
+            nodes = enitity_map[question_id]
             for n in nodes:
                 if not n["node_type"] == "literal":
                     input += n["friendly_name"] + " : " + n["id"] + " , "
 
-        if add_relations and  str(question_id) in relation_map:
+        if add_relations and  question_id in relation_map:
             input += "relations: "
             if ques["id"] in ent_schema:
-                edges = relation_map[str(question_id)]
+                edges = relation_map[question_id]
                 for e in edges:
                     input += e["friendly_name"] + " : " + e["relation"] + " , "
         return input+"[SEP]target_freebase"
