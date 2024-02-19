@@ -94,13 +94,13 @@ def freebase_resource_generator(add_entities=True,add_relations=True,use_gold_re
             input += "entities: "
             for ent in list(entities.keys()):
                 input += entities[ent]["friendly_name"] + " : " + ent + " , "
-            if ques["id"] in ent_schema:
+            if question_id in ent_schema:
                 nodes = ent_schema[question_id]["classes"][:3]
                 for n in nodes:
                     input +=freebase_types[n] + " : " + n + " , "
         if add_relations and question_id in ent_schema:
             input += "relations: "
-            if ques["id"] in ent_schema:
+            if question_id in ent_schema:
                 nodes = ent_schema[question_id]["relations"][:3]
                 for n in nodes:
                     input +=freebase_relations[n] + " : " + n + " , "
