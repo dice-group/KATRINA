@@ -2,8 +2,8 @@ from parameters import KATRINAParser
 from typing import Callable, Dict, List, Optional, Tuple, Iterable
 import numpy as np
 import os
-from data_processing import ListDataset,LCqUAD, LCqUAD_rep_vars,LCqUAD_rep_vars_triples, Dataprocessor_Combined_simple,Dataprocessor_Combined_entities\
-    ,Dataprocessor_Combined_entities_relations,Dataprocessor_Combined_predicted_resources
+from data_processing import ListDataset,Dataprocessor_Combined_entities\
+    ,Dataprocessor_Combined_predicted_resources,Dataprocessor_Combined_QALD
 from transformers import Trainer
 from transformers import (
     AutoConfig,
@@ -102,7 +102,7 @@ def main():
         # compute_metrics_fn = summarization_metrics if "summarization" in task_name else translation_metrics
         compute_metrics_fn = exact_match_metrics
         return compute_metrics_fn
-    dg=Dataprocessor_Combined_predicted_resources(tokenizer, params)
+    dg=Dataprocessor_Combined_QALD(tokenizer, params)
 
     # Get datasets
     if params["train_model"]:
