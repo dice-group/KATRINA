@@ -837,7 +837,7 @@ class Dataprocessor_Combined_QALD(Dataprocessor_KBQA_basic):
         lcquad_data = json.load(open(path_to_ds + "/qald.json"))
         samples = []
         len_qald=len(lcquad_data)
-        for question in tqdm(lcquad_data[:len_qald]):
+        for question in tqdm(lcquad_data):
             # print(question)
             if "entities" in question and question["question"] is not None:
                 question_str = question["question"] + "[SEP] entities: "
@@ -886,7 +886,7 @@ class Dataprocessor_Combined_QALD(Dataprocessor_KBQA_basic):
             for ln in file:
                 el = json.loads(ln)
                 schema[el["qid"]] = el
-        for el in tqdm(grail_qa):
+        for el in tqdm(grail_qa[:len_qald]):
             question_str = el["question"] + "[SEP] entities: "
             nodes = el["graph_query"]["nodes"]
             classes = set()
