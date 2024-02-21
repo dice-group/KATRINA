@@ -47,12 +47,18 @@ def main():
         cache_dir=params["cache_dir"],
     )
     model = AutoModelForSeq2SeqLM.from_pretrained(
+        "/data/KATRINA/combined-t5-base-input-update/e2emodel",
+        config=config,
+        cache_dir=params["cache_dir"],
+    )
+    '''
+    model = AutoModelForSeq2SeqLM.from_pretrained(
         params["model_name"],
         from_tf=".ckpt" in params["model_name"],
         config=config,
         cache_dir=params["cache_dir"],
     )
-
+    '''
     # use task specific params
     # use_task_specific_params(model, data_args.task)
 

@@ -851,6 +851,7 @@ class Dataprocessor_Combined_QALD(Dataprocessor_KBQA_basic):
                     question_str += rel["label"] + " : " + rel["uri"].replace("http://www.wikidata.org/prop/direct/",
                                                                               "") + " , "
                 query = question["sparql_wikidata"]
+                print(query)
                 parsed_query = sparql.parser.parseQuery(prefixes + query)
                 en = algebra.translateQuery(parsed_query)
                 '''
