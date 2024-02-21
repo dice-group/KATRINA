@@ -147,7 +147,7 @@ def wikidata_resource_generater(add_entities=True,add_relations=True):
                 input +=ent["label"] + " : " + ent["uri"].replace("http://www.wikidata.org/entity/", "") + " , "
         if add_relations and question_id in enitity_map:
             relations = enitity_map[question_id]["relations"]
-            input += "reltions: "
+            input += "relations: "
             for rel in relations:
                 input +=rel["label"] + " : " + rel["uri"].replace("http://www.wikidata.org/prop/direct/", "") + " , "
         return input+"[SEP]target_wikidata"
