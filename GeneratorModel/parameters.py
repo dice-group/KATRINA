@@ -149,12 +149,12 @@ class KATRINAParser(argparse.ArgumentParser):
         parser.add_argument(
             "--use_freebase",
             default=True,
-            type=str,
+            type=bool,
             help="use freebase data",
         )
         parser.add_argument(
             "--use_wikidata",
             default=True,
-            type=str,
+            type=bool,
             help="use wikidata data",
         )
