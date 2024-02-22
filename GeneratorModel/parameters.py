@@ -145,3 +145,16 @@ class KATRINAParser(argparse.ArgumentParser):
             type=str,
             help="Path to training data",
         )
+
+        parser.add_argument(
+            "--use_freebase",
+            default=True,
+            type=str,
+            help="use freebase data",
+        )
+        parser.add_argument(
+            "--use_wikidata",
+            default=True,
+            type=str,
+            help="use wikidata data",
+        )

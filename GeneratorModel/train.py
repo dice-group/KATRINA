@@ -46,19 +46,21 @@ def main():
         params["tokenizer_name"] if params["tokenizer_name"] is not None else params["model_name"],
         cache_dir=params["cache_dir"],
     )
+    '''
     model = AutoModelForSeq2SeqLM.from_pretrained(
         "/data/KATRINA/combined-t5-base-input-update/e2emodel",
         config=config,
         cache_dir=params["cache_dir"],
     )
     '''
+
     model = AutoModelForSeq2SeqLM.from_pretrained(
         params["model_name"],
         from_tf=".ckpt" in params["model_name"],
         config=config,
         cache_dir=params["cache_dir"],
     )
-    '''
+
     # use task specific params
     # use_task_specific_params(model, data_args.task)
 
@@ -108,7 +110,7 @@ def main():
         # compute_metrics_fn = summarization_metrics if "summarization" in task_name else translation_metrics
         compute_metrics_fn = exact_match_metrics
         return compute_metrics_fn
-    dg=Dataprocessor_Combined_QALD(tokenizer, params)
+    dg=Dataprocessor_Combined_predicted_resources(tokenizer, params)
 
     # Get datasets
     if params["train_model"]:
