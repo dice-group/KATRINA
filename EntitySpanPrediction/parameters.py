@@ -150,13 +150,13 @@ class KATRINAParser(argparse.ArgumentParser):
         parser = self.add_argument_group("Model Arguments")
         parser.add_argument(
             "--entity_trie_file",
-            default="precomputed/EntityLinking/entity_trie_alt.pkl",
+            default="precomputed/EntityLinking/entity_trie.pkl",
             type=str,
             help="Entity Trie File",
         )
         parser.add_argument(
             "--entity_dict_file",
-            default="precomputed/EntityLinking/entity_dict_update.pkl",
+            default="precomputed/EntityLinking/labels_to_wikidata_id.pkl",
             type=str,
             help="Entity Dictionary File",
         )

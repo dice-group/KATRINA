@@ -17,6 +17,6 @@ for question in tqdm(data):
         ent,rel=mod.predict(question["question"])
         question["entities"]=ent
         question["relations"]=rel
-json.dump(data,open(params["output_file"],"w",encoding="utf-8"))
+json.dump(data,open(params["output_file"],"w",encoding="utf-8"),indent=4)
 #../qa-data/LCQUAD/test.json
 #../qa-data/LCQUAD/test_pred_resource.json
