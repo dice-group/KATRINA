@@ -685,7 +685,7 @@ class Dataprocessor_Combined_predicted_resources(Dataprocessor_KBQA_basic):
                 PREFIX wikibase: <http://wikiba.se/ontology#> 
                 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
                 """
-        lcquad_data = json.load(open(path_to_ds+"/lcquad.json"))
+        lcquad_data = json.load(open(path_to_ds+"/lcquad_el.json"))
         samples = []
         if self.args["use_wikidata"]:
             for question in tqdm(lcquad_data):
@@ -700,32 +700,37 @@ class Dataprocessor_Combined_predicted_resources(Dataprocessor_KBQA_basic):
                     for rel in relations:
                         question_str+=rel["label"]+ " : "+ rel["uri"].replace("http://www.wikidata.org/prop/direct/","") + " , "
                     query = question["sparql_wikidata"]
-                    parsed_query = sparql.parser.parseQuery(prefixes+query)
-                    en = algebra.translateQuery(parsed_query)
-                    '''
-            
-                    for ent in question["entities"]:
-                        key = ent["uri"].replace("http://www.wikidata.org/entity/", "")
-                        query = query.replace(key, ent["label"])
-                    for rel in question["relations"]:
-                        key = rel["uri"].replace("http://www.wikidata.org/prop/direct/", "")
-                        query = query.replace(key, rel["label"])
-                    '''
-                    res_vars = en.algebra["PV"]
-                    vars = en.algebra["_vars"]
-                    it = 0
+                    try:
+                        parsed_query = sparql.parser.parseQuery(prefixes+query)
 
-                    for el in res_vars:
-                        query = query.replace("?" + el, "_result_" + str(it))
-                        it += 1
-                    it = 0
-                    for el in vars:
-                        query = query.replace("?" + el, "_var_" + str(it))
-                        it += 1
-                    query = query.replace("{", "_cbo_")
-                    query = query.replace("}", "_cbc_")
-                    sample = {"input": question_str+"[SEP]target_wikidata", "label": query}
-                    samples.append(sample)
+
+                        en = algebra.translateQuery(parsed_query)
+                        '''
+                
+                        for ent in question["entities"]:
+                            key = ent["uri"].replace("http://www.wikidata.org/entity/", "")
+                            query = query.replace(key, ent["label"])
+                        for rel in question["relations"]:
+                            key = rel["uri"].replace("http://www.wikidata.org/prop/direct/", "")
+                            query = query.replace(key, rel["label"])
+                        '''
+                        res_vars = en.algebra["PV"]
+                        vars = en.algebra["_vars"]
+                        it = 0
+
+                        for el in res_vars:
+                            query = query.replace("?" + el, "_result_" + str(it))
+                            it += 1
+                        it = 0
+                        for el in vars:
+                            query = query.replace("?" + el, "_var_" + str(it))
+                            it += 1
+                        query = query.replace("{", "_cbo_")
+                        query = query.replace("}", "_cbc_")
+                        sample = {"input": question_str+"[SEP]target_wikidata", "label": query}
+                        samples.append(sample)
+                    except:
+                        print("failed: "+query)
         if self.args["use_freebase"]:
             grail_qa = json.load(open(path_to_ds+"/grail.json"))
             types=pickle.load(open("../precomputed/Generator/type_dict_freebase.pkl","rb"))
