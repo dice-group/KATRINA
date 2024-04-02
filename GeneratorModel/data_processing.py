@@ -883,91 +883,91 @@ class Dataprocessor_Combined_QALD(Dataprocessor_KBQA_basic):
                 query = query.replace("}", "_cbc_")
                 sample = {"input": question_str + "[SEP]target_wikidata", "label": query}
                 samples.append(sample)
+        if self.args["use_freebase"]:
+            grail_qa = json.load(open(path_to_ds + "/grail.json"))
+            types = pickle.load(open("../precomputed/Generator/type_dict_freebase.pkl", "rb"))
+            relation_labels = pickle.load(open("../precomputed/Generator/relation_labels.pkl", "rb"))
+            with(open(path_to_ds + "/dense_retrieval_grailqa.jsonl", "r")) as file:
+                schema = {}
+                for ln in file:
+                    el = json.loads(ln)
+                    schema[el["qid"]] = el
+            for el in tqdm(grail_qa[:len_qald]):
+                question_str = el["question"] + "[SEP] entities: "
+                nodes = el["graph_query"]["nodes"]
+                classes = set()
+                nodes_to_add = []
+                for n in nodes:
+                    if not n["node_type"] == "literal":
+                        if n["node_type"] == "class":
+                            classes.add(n["id"])
+                        nodes_to_add.append(n)
+                while len(classes) < 3:
+                    for cl in schema[el["qid"]]["classes"]:
+                        if not cl in classes:
+                            classes.add(cl)
+                            nodes_to_add.append({"id": cl, "friendly_name": types[cl]})
+                        if len(classes) == 3:
+                            break
+                #                    question_str += n["friendly_name"] + " : " + n["id"]+ " , "
+                shuffle(nodes_to_add)
+                for n in nodes_to_add:
+                    question_str += n["friendly_name"] + " : " + n["id"] + " , "
+                edges = el["graph_query"]["edges"]
+                relations = set()
+                relations_to_add = []
+                for e in edges:
+                    relations.add(e["relation"])
+                    relations_to_add.append(e)
+                while len(relations) < 3:
+                    for rel in schema[el["qid"]]["relations"]:
+                        if not rel in relations:
+                            relations.add(rel)
+                            relations_to_add.append({"relation": rel, "friendly_name": relation_labels[rel]})
+                        if len(relations) == 3:
+                            break
+                shuffle(relations_to_add)
+                question_str = question_str + "relations: "
+                for e in relations_to_add:
+                    question_str += e["friendly_name"] + " : " + e["relation"] + " , "
 
-        grail_qa = json.load(open(path_to_ds + "/grail.json"))
-        types = pickle.load(open("../precomputed/Generator/type_dict_freebase.pkl", "rb"))
-        relation_labels = pickle.load(open("../precomputed/Generator/relation_labels.pkl", "rb"))
-        with(open(path_to_ds + "/dense_retrieval_grailqa.jsonl", "r")) as file:
-            schema = {}
-            for ln in file:
-                el = json.loads(ln)
-                schema[el["qid"]] = el
-        for el in tqdm(grail_qa[:len_qald]):
-            question_str = el["question"] + "[SEP] entities: "
-            nodes = el["graph_query"]["nodes"]
-            classes = set()
-            nodes_to_add = []
-            for n in nodes:
-                if not n["node_type"] == "literal":
-                    if n["node_type"] == "class":
-                        classes.add(n["id"])
-                    nodes_to_add.append(n)
-            while len(classes) < 3:
-                for cl in schema[el["qid"]]["classes"]:
-                    if not cl in classes:
-                        classes.add(cl)
-                        nodes_to_add.append({"id": cl, "friendly_name": types[cl]})
-                    if len(classes) == 3:
-                        break
-            #                    question_str += n["friendly_name"] + " : " + n["id"]+ " , "
-            shuffle(nodes_to_add)
-            for n in nodes_to_add:
-                question_str += n["friendly_name"] + " : " + n["id"] + " , "
-            edges = el["graph_query"]["edges"]
-            relations = set()
-            relations_to_add = []
-            for e in edges:
-                relations.add(e["relation"])
-                relations_to_add.append(e)
-            while len(relations) < 3:
-                for rel in schema[el["qid"]]["relations"]:
-                    if not rel in relations:
-                        relations.add(rel)
-                        relations_to_add.append({"relation": rel, "friendly_name": relation_labels[rel]})
-                    if len(relations) == 3:
-                        break
-            shuffle(relations_to_add)
-            question_str = question_str + "relations: "
-            for e in relations_to_add:
-                question_str += e["friendly_name"] + " : " + e["relation"] + " , "
+                query = el["sparql_query"]
+                nodes = el["graph_query"]["nodes"]
+                edges = el["graph_query"]["edges"]
+                # query=preprocessfreebasequery(query)
+                parsed_query = sparql.parser.parseQuery(query)
 
-            query = el["sparql_query"]
-            nodes = el["graph_query"]["nodes"]
-            edges = el["graph_query"]["edges"]
-            # query=preprocessfreebasequery(query)
-            parsed_query = sparql.parser.parseQuery(query)
+                en = algebra.translateQuery(parsed_query)
 
-            en = algebra.translateQuery(parsed_query)
+                '''
+                for e in edges:
+                    query = query.replace(e["relation"], e["friendly_name"])
+                for n in nodes:
+                    query = query.replace(n["id"], n["friendly_name"])
+                '''
+                query = query.replace("\n", "")
+                query = query.replace("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>", "")
+                query = query.replace(
+                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>", "")
+                query = query.replace(
+                    "PREFIX : <http://rdf.freebase.com/ns/> ", "")
 
-            '''
-            for e in edges:
-                query = query.replace(e["relation"], e["friendly_name"])
-            for n in nodes:
-                query = query.replace(n["id"], n["friendly_name"])
-            '''
-            query = query.replace("\n", "")
-            query = query.replace("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>", "")
-            query = query.replace(
-                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>", "")
-            query = query.replace(
-                "PREFIX : <http://rdf.freebase.com/ns/> ", "")
+                res_vars = en.algebra["PV"]
+                vars = en.algebra["_vars"]
+                it = 0
 
-            res_vars = en.algebra["PV"]
-            vars = en.algebra["_vars"]
-            it = 0
+                for el in res_vars:
+                    query = query.replace("?" + el, "_result_" + str(it))
+                    it += 1
+                it = 0
+                for el in vars:
+                    query = query.replace("?" + el, "_var_" + str(it))
+                    it += 1
+                query = query.replace("{", "_cbo_")
+                query = query.replace("}", "_cbc_")
+                sample = {"input": question_str + "[SEP]target_freebase", "label": query}
 
-            for el in res_vars:
-                query = query.replace("?" + el, "_result_" + str(it))
-                it += 1
-            it = 0
-            for el in vars:
-                query = query.replace("?" + el, "_var_" + str(it))
-                it += 1
-            query = query.replace("{", "_cbo_")
-            query = query.replace("}", "_cbc_")
-            sample = {"input": question_str + "[SEP]target_freebase", "label": query}
-
-            samples.append(sample)
+                samples.append(sample)
         return samples
 
 class Dataprocessor_QALD(Dataprocessor_KBQA_basic):
