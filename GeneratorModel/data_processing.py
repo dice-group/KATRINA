@@ -750,12 +750,12 @@ class Dataprocessor_Combined_predicted_resources(Dataprocessor_KBQA_basic):
                         if n["node_type"]=="class":
                             classes.add(n["id"])
                         nodes_to_add.append(n)
-                while len(classes)<3:
+                while len(classes)<5:
                     for cl in schema[el["qid"]]["classes"]:
                         if not cl in classes:
                             classes.add(cl)
                             nodes_to_add.append({"id":cl,"friendly_name":types[cl]})
-                        if len(classes)==3:
+                        if len(classes)==5:
                             break
     #                    question_str += n["friendly_name"] + " : " + n["id"]+ " , "
                 shuffle(nodes_to_add)
@@ -767,12 +767,12 @@ class Dataprocessor_Combined_predicted_resources(Dataprocessor_KBQA_basic):
                 for e in edges:
                     relations.add(e["relation"])
                     relations_to_add.append(e)
-                while len(relations)<3:
+                while len(relations)<5:
                     for rel in schema[el["qid"]]["relations"]:
                         if not rel in relations:
                             relations.add(rel)
                             relations_to_add.append({"relation":rel,"friendly_name":relation_labels[rel]})
-                        if len(relations)==3:
+                        if len(relations)==5:
                             break
                 shuffle(relations_to_add)
                 question_str = question_str + "relations: "
@@ -781,20 +781,16 @@ class Dataprocessor_Combined_predicted_resources(Dataprocessor_KBQA_basic):
 
 
 
-                query = el["sparql_query"]
+                query = el["s_expression"]
                 nodes = el["graph_query"]["nodes"]
                 edges = el["graph_query"]["edges"]
                 #query=preprocessfreebasequery(query)
+                '''
                 parsed_query = sparql.parser.parseQuery(query)
 
                 en = algebra.translateQuery(parsed_query)
 
-                '''
-                for e in edges:
-                    query = query.replace(e["relation"], e["friendly_name"])
-                for n in nodes:
-                    query = query.replace(n["id"], n["friendly_name"])
-                '''
+                
                 query = query.replace("\n", "")
                 query = query.replace("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>", "")
                 query = query.replace(
@@ -815,6 +811,7 @@ class Dataprocessor_Combined_predicted_resources(Dataprocessor_KBQA_basic):
                     it += 1
                 query = query.replace("{", "_cbo_")
                 query = query.replace("}", "_cbc_")
+                '''
                 sample = {"input": question_str+"[SEP]target_freebase", "label": query}
 
                 samples.append(sample)
