@@ -95,13 +95,13 @@ def freebase_resource_generator(add_entities=True,add_relations=True,use_gold_re
             for ent in list(entities.keys()):
                 input += entities[ent]["friendly_name"] + " : " + ent + " , "
             if question_id in ent_schema:
-                nodes = ent_schema[question_id]["classes"][:3]
+                nodes = ent_schema[question_id]["classes"][:5]
                 for n in nodes:
                     input +=freebase_types[n] + " : " + n + " , "
         if add_relations and question_id in ent_schema:
             input += "relations: "
             if question_id in ent_schema:
-                nodes = ent_schema[question_id]["relations"][:3]
+                nodes = ent_schema[question_id]["relations"][:5]
                 for n in nodes:
                     input +=freebase_relations[n] + " : " + n + " , "
         return input+"[SEP]target_freebase"
@@ -176,6 +176,7 @@ for ques in data["questions"]:
             out = model.generate(input_ids = i.to(device),max_length=650)
             query = tokenizer.decode(out[0], skip_special_tokens=True)+"\n"
             id=ques["id"]
+            print(query)
             query_dump[id]={"candidates":[{"logical_form":query}]}
 
 
