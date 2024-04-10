@@ -5,6 +5,7 @@ from SPARQLWrapper import SPARQLWrapper,JSON
 import torch
 from parameters import KATRINAParser
 import pickle
+from tqdm import tqdm
 parser = KATRINAParser(add_model_args=True,add_training_args=True)
 parser.add_model_args()
 parser.add_inference_args()
@@ -163,11 +164,11 @@ else:
         resource_predicor = freebase_resource_generator(params["use_entities"], params["use_relations"])
 answer_generator =get_answer_generator(params)
 query_dump={}
-for ques in data["questions"]:
+for ques in tqdm(data["questions"]):
     if ques["question"][0]["string"] is not None:
             input=resource_predicor(ques)
-            print(input)
-            print(ques["query"]["sparql"])
+            #print(input)
+            #print(ques["query"]["sparql"])
             labels="emp"
             sample = dp.process_sample(input,labels)
             i=dp.process_sample(input).input_ids
@@ -176,7 +177,7 @@ for ques in data["questions"]:
             out = model.generate(input_ids = i.to(device),max_length=650)
             query = tokenizer.decode(out[0], skip_special_tokens=True)+"\n"
             id=ques["id"]
-            print(query)
+            #print(query)
             query_dump[id]={"candidates":[{"logical_form":query}]}
 
 
