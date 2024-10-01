@@ -1,7 +1,7 @@
 import requests
 import json
-from EntityLinking import surface_index_memory
-from EntityLinking.bert_entity_linker import BertEntityLinker
+from EntityLinkingFreebase import surface_index_memory
+from EntityLinkingFreebase.bert_entity_linker import BertEntityLinker
 import json
 surface_index = surface_index_memory.EntitySurfaceIndexMemory(
         "EntityLinking/data/entity_list_file_freebase_complete_all_mention", "EntityLinking/data/surface_map_file_freebase_complete_all_mention",

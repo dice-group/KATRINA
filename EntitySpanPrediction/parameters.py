@@ -156,7 +156,7 @@ class KATRINAParser(argparse.ArgumentParser):
         )
         parser.add_argument(
             "--entity_dict_file",
-            default="precomputed/EntityLinking/labels_to_wikidata_id.pkl",
+            default="precomputed/EntityLinking/label_to_entity_wk.pkl",
             type=str,
             help="Entity Dictionary File",
         )
@@ -168,13 +168,13 @@ class KATRINAParser(argparse.ArgumentParser):
         )
         parser.add_argument(
             "--relation_dict_file",
-            default="precomputed/EntityLinking/relation_dict.pkl",
+            default="precomputed/EntityLinking/label_to_relation_wk.pkl",
             type=str,
             help="Relation Dict File",
         )
         parser.add_argument(
             "--pretrained_model_path",
-            default="precomputed/EntityLinking/span_model",
+            default="precomputed/EntityLinking/span-qald",
             type=str,
             help="Path to pretrained model"
         )

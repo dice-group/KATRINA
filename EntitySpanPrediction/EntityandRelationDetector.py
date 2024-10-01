@@ -45,7 +45,9 @@ class EntityAndRelationDetector():
 
     def predict(self,sentence):
         i = self.dp.process_sample(sentence+"[SEP]target_wikidata").input_ids
-        out = self.model.generate(input_ids=i.to(self.device), max_length=650, prefix_allowed_tokens_fn=self.prefix_allowed_tokens_fn)
+        out = self.model.generate(input_ids=i.to(self.device), max_length=650)
+        #out = self.model.generate(input_ids=i.to(self.device), max_length=650,
+        #                          prefix_allowed_tokens_fn=self.prefix_allowed_tokens_fn)
         out_str=self.tokenizer.decode(out[0], skip_special_tokens=True)
         # print(out_str)
         try:

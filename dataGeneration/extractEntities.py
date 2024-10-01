@@ -6,7 +6,7 @@ from rdflib.plugins.sparql.parserutils import Expr, CompValue
 from rdflib.paths import Path
 from rdflib.plugins.sparql import algebra
 import json
-
+import pickle
 class Node_Tiny:
     def __init__(self,node_name):
         self.node_value=node_name
@@ -149,7 +149,7 @@ PREFIX pq: <http://www.wikidata.org/prop/qualifier/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX bd: <http://www.bigdata.com/rdf#>
 """
-
+'''
 data=json.load(open("../qa-data/LCQUAD/test.json","r",encoding="utf-8"))
 for question in data:
     try:
@@ -160,11 +160,35 @@ for question in data:
     except:
         print(question["sparql_wikidata"]+" failed")
 json.dump(data,open("../qa-data/LCQUAD/test-with-resources.json","w",encoding="utf-8"))
-
-
 '''
-with open("../qald-9-train-multilingual.json","r",encoding="utf-8")as queries:
-    queries=json.load(queries)
-    for el in queries["questions"]:
-        process_query(el["query"]["sparql"])
-'''
+labels=pickle.load(open("../precomputed/labels_wikipedia.sav","rb"))
+labels_relations=pickle.load(open("../precomputed/relation_labels.sav","rb"))
+processed=[]
+with open("../qa-data/QALD/qald_10.json", "r", encoding="utf-8")as data:
+    queries=json.load(data)["questions"]
+    for el in queries:
+        question_str=""
+        for q in el["question"]:
+            if q["language"]=="en":
+                question_str=q["string"]
+            query=el["query"]["sparql"]
+
+        print(question_str)
+        print()
+        entities,relations=process_query(query)
+        query=query.replace("PREFIX bd: <http://www.bigdata.com/rdf#> PREFIX dct: <http://purl.org/dc/terms/> PREFIX geo: <http://www.opengis.net/ont/geosparql#> PREFIX p: <http://www.wikidata.org/prop/> PREFIX pq: <http://www.wikidata.org/prop/qualifier/> PREFIX ps: <http://www.wikidata.org/prop/statement/> PREFIX psn: <http://www.wikidata.org/prop/statement/value-normalized/> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX wd: <http://www.wikidata.org/entity/> PREFIX wds: <http://www.wikidata.org/entity/statement/> PREFIX wdt: <http://www.wikidata.org/prop/direct/> PREFIX wdv: <http://www.wikidata.org/value/> PREFIX wikibase: <http://wikiba.se/ontology#> PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> ","")
+        print(entities)
+        print(relations)
+        entities=list(entities)
+        ent_list=[]
+        for en in entities:
+            if en.replace("http://www.wikidata.org/entity/","") in labels:
+                ent_list.append({"uri": en, "label": labels[en.replace("http://www.wikidata.org/entity/", "")]})
+
+        relation_list=[]
+        for en in relations:
+            if en.replace("http://www.wikidata.org/prop/direct/","") in labels_relations:
+                relation_list.append({"uri": en, "label": labels_relations[en.replace("http://www.wikidata.org/prop/direct/","")]})
+        processed.append({"uid":el["id"],"question":question_str, "sparql_wikidata":query, "entities":ent_list,"relations":relation_list})
+json.dump(processed, open("../qa-data/QALD/qald_10.json", "w", encoding="utf-8"), indent=4)
+

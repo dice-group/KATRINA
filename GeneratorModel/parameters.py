@@ -154,7 +154,7 @@ class KATRINAParser(argparse.ArgumentParser):
         )
         parser.add_argument(
             "--use_wikidata",
-            default=True,
+            default=False,
             type=bool,
             help="use wikidata data",
         )

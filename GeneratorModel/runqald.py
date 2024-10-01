@@ -10,6 +10,7 @@ model = T5ForConditionalGeneration.from_pretrained("complete")
 #model = T5ForConditionalGeneration.from_pretrained("t5-large-baseline")
 model.to(device)
 ent_data=json.load(open("../qa-data/combined/test/lcquad.json","r",encoding="utf-8"))
+#ent_data=json.load(open("../qa-data/QALD/QALD_10_with_entitities.json","r",encoding="utf-8"))
 enitity_map={}
 for ques in ent_data:
     if "entities"in ques:
@@ -17,6 +18,7 @@ for ques in ent_data:
         entities=ques["entities"]
         enitity_map[id]=entities
 data=json.load(open("../qa-data/LCQUAD/lcquad-test-quald.json","r",encoding="utf-8"))
+#data=json.load(open("../qa-data/QALD/qald_10.json","r",encoding="utf-8"))
 '''
 input="How many chancellors did Germany have?"
 #print(input)
