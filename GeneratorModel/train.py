@@ -2,8 +2,9 @@ from parameters import KATRINAParser
 from typing import Callable, Dict, List, Optional, Tuple, Iterable
 import numpy as np
 import os
+os.environ['HF_HOME'] = '/data/hf_home'
 from data_processing import ListDataset,Dataprocessor_Combined_entities\
-    ,Dataprocessor_Combined_predicted_resources,Dataprocessor_Combined_QALD
+    ,Dataprocessor_Combined_predicted_resources,Dataprocessor_Combined_QALD,Combined_Processor
 from transformers import Trainer
 from transformers import (
     AutoConfig,
@@ -110,14 +111,19 @@ def main():
         # compute_metrics_fn = summarization_metrics if "summarization" in task_name else translation_metrics
         compute_metrics_fn = exact_match_metrics
         return compute_metrics_fn
-    dg=Dataprocessor_Combined_predicted_resources(tokenizer, params)
-
+    #dg=Dataprocessor_Combined_predicted_resources(tokenizer, params)
+    dg=Combined_Processor(tokenizer,params)
     # Get datasets
     if params["train_model"]:
         train_dataset = ListDataset(dg.process_training_ds(params["training_ds"]))
     else:
         train_dataset = ListDataset(dg.process_training_ds([]))
-    eval_dataset = ListDataset(dg.process_training_ds(params["eval_ds"]))
+    if params["use_eval_dataset"]:
+        eval_dataset = ListDataset(dg.process_training_ds(params["eval_ds"]))
+    else:
+        split_ind=int(len(train_dataset.examples)*params["eval_ratio"])
+        eval_dataset=ListDataset(train_dataset.examples[:split_ind])
+        train_dataset=ListDataset(train_dataset[split_ind:])
     '''
     if training_args.do_eval:
         eval_dataset = ListDataset(load_and_cache_examples(model_args, tokenizer, evaluate=True))

@@ -131,19 +131,37 @@ class KATRINAParser(argparse.ArgumentParser):
             "--output_dir",
             default="out-combined-simple-limtest",
             type=str,
-            help="Whether to train a model",
+            help="Output directory",
+        )
+        parser.add_argument(
+            "--schema_links",
+            default="../qa-data/combined/train/dense_retrieval_grailqa.jsonl",
+            type=str,
+            help="Output directory",
         )
         parser.add_argument(
             "--training_ds",
-            default="../qa-data/combined/train",
+            default="../qa-data/combined_qald/train",
             type=str,
-            help="Path to trainig data",
+            help="Path to training data",
         )
         parser.add_argument(
             "--eval_ds",
-            default="../qa-data/combined/test",
+            default="../qa-data/combined_qald/test",
             type=str,
             help="Path to training data",
+        )
+        parser.add_argument(
+            "--use_eval_dataset",
+            default=False,
+            type=bool,
+            help="Wheather to use an evaluation dataset or split the training data",
+        )
+        parser.add_argument(
+            "--eval_ratio",
+            default=0.05,
+            type=float,
+            help="Path to evaluation data",
         )
 
         parser.add_argument(
@@ -153,8 +171,27 @@ class KATRINAParser(argparse.ArgumentParser):
             help="use freebase data",
         )
         parser.add_argument(
+            "--grail_qa_file",
+            default="grail.json",
+            type=str,
+            help="use freebase data",
+        )
+        parser.add_argument(
+            "--lc_quad_file",
+            default="qald.json",
+            type=str,
+            help="use freebase data",
+        )
+
+        parser.add_argument(
+            "--add_entities",
+            default=True,
+            type=bool,
+            help="add entities in training data",
+        )
+        parser.add_argument(
             "--use_wikidata",
-            default=False,
+            default=True,
             type=bool,
             help="use wikidata data",
         )
