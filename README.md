@@ -1,9 +1,9 @@
-# installation
+
+# Joint Query Generation
+## installation
 dowload the repository
 
 run pip install -r requirements
-# Joint Query Generation
-This repository 
 ## training Query Generation models
 run the script train.py in the package Generator Model
 
