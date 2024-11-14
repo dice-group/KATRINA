@@ -1,3 +1,7 @@
+# installation
+dowload the repository
+
+run pip install -r requirements
 # Joint Query Generation
 This repository 
 ## training Query Generation models
