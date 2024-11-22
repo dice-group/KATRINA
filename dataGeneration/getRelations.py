@@ -66,31 +66,3 @@ for rel in missing:
 pickle.dump(relations,open("../precomputed/relation_labels.sav","wb"))
 
 
-def queryExamples(relation):
-    triples = []
-    sparql = SPARQLWrapper(
-        "https://query.wikidata.org/bigdata/namespace/wdq/sparql",
-        agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36')
-
-    sparql.setQuery('''
-                SELECT ?subject ?object WHERE {
-
-                    ?subject ''' + relation + ''' ?object .
-                }
-
-                LIMIT 100 ''')
-    sparql.setReturnFormat(JSON)
-    res = sparql.queryAndConvert()
-    for el in res['results']["bindings"]:
-        triples.append([el["subject"]["value"], relation, el["object"]["value"]])
-    return triples
-
-
-#relations = pickle.load(open("samples.sav", "rb"))
-
-for relation in relations:
-    print(relation)
-    triples = queryExamples(
-        "<" + relation.replace("http://www.wikidata.org/entity/", "http://www.wikidata.org/prop/direct/") + ">")
-    pickle.dump(triples, open("relationexamples/" + relation.replace("http://www.wikidata.org/entity/", ""), 'wb'))
-

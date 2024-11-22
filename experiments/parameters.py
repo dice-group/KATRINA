@@ -62,7 +62,7 @@ class KATRINAParser(argparse.ArgumentParser):
 
         parser.add_argument(
             "--pretrained_model_path",
-            default="../GeneratorModel/complete",
+            # default"models/combined_model"
             type=str,
             help="Path to pretrained model"
         )
@@ -80,9 +80,9 @@ class KATRINAParser(argparse.ArgumentParser):
         )
         parser.add_argument(
             "--predict_file",
-            default="../qa-data/GrailQA_v1.0/grailqa_dev_qald.json",
+            #default="../qa-data/combined/test/grail.json",
             type=str,
-            help="lcquad_fomated_file_to_predict_resources_for"
+            help="LCQuAD of grail qa formated file in case of LCQuAD the file should also contain predicted entities"
         )
         parser.add_argument(
             "--output_file",
@@ -94,7 +94,7 @@ class KATRINAParser(argparse.ArgumentParser):
             "--benchmark_KG",
             default="freebase",
             type=str,
-            help="use freebase or wikidata KG for benchmarking"
+            help="use freebase or wikidata KG for benchmarking in case of freebase, the script expects a file in grail qa-format, else in LC-QuAD format"
         )
 
         parser.add_argument(
@@ -136,7 +136,7 @@ class KATRINAParser(argparse.ArgumentParser):
             "--freebase_qa_entity_file",
             default="../qa-data/GrailQA_v1.0/grailqa_el.json",
             type=str,
-            help="file with entity linking results"
+            help="file with entity linking results for e.g grail qa"
         )
 
         parser.add_argument(
@@ -153,7 +153,7 @@ class KATRINAParser(argparse.ArgumentParser):
         )
         parser.add_argument(
             "--gold_resource_benchmark",
-            default="../qa-data/GrailQA_v1.0/grailqa_v1.0_dev.json",
+            default="../qa-data/combined/test/grail.json",
             type=str,
             help="benchmark with gold entities"
         )

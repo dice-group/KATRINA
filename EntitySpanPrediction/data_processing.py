@@ -82,7 +82,7 @@ class Dataprocessor_KBQA_basic(Dataprocessor):
 
         return encoding.data
 
-
+'''
 class LCqUAD_text_ent(Dataprocessor_KBQA_basic):
     def read_ds_to_list(self,path_to_ds):
         samples=[]
@@ -100,9 +100,9 @@ class LCqUAD_text_ent(Dataprocessor_KBQA_basic):
                 samples.append(sample)
         return samples
 
+'''
 
-
-
+'''
 class Dataprocessor_Combined_simple(Dataprocessor_KBQA_basic):
     def read_ds_to_list(self, path_to_ds):
         prefixes = """
@@ -153,7 +153,7 @@ class Dataprocessor_Combined_simple(Dataprocessor_KBQA_basic):
             samples.append(sample)
 
         return samples
-
+'''
 class Dataprocessor_Combined_simple_relations(Dataprocessor_KBQA_basic):
     def read_ds_to_list(self, path_to_ds):
         prefixes = """
@@ -168,7 +168,7 @@ class Dataprocessor_Combined_simple_relations(Dataprocessor_KBQA_basic):
                 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
                 PREFIX bd: <http://www.bigdata.com/rdf#>
                 """
-        lcquad_data = json.load(open(path_to_ds+"/lcquad.json"))
+        lcquad_data = json.load(open(path_to_ds))
         #entitylabels = pickle.load(open("../precomputed/wikidata_labels.sav", "rb"))
         samples=[]
         for question in tqdm(lcquad_data):

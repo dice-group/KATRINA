@@ -2,7 +2,7 @@ from parameters import KATRINAParser
 from typing import Callable, Dict, List, Optional, Tuple, Iterable
 import numpy as np
 import os
-from data_processing import ListDataset,LCqUAD, LCqUAD_rep_vars,Dataprocessor_Combined_simple_relations, Dataprocessor_Combined
+from data_processing import ListDataset,Dataprocessor_Combined_simple_relations
 from transformers import Trainer
 from transformers import (
     AutoConfig,
@@ -108,7 +108,12 @@ def main():
         train_dataset = ListDataset(dg.process_training_ds(params["training_ds"]))
     else:
         train_dataset = ListDataset(dg.process_training_ds([]))
-    eval_dataset = ListDataset(dg.process_training_ds(params["eval_ds"]))
+    if params["use_eval_dataset"]:
+        eval_dataset = ListDataset(dg.process_training_ds(params["eval_ds"]))
+    else:
+        split_ind=int(len(train_dataset.examples)*params["eval_ratio"])
+        eval_dataset=ListDataset(train_dataset.examples[:split_ind])
+        train_dataset=ListDataset(train_dataset[split_ind:])
     '''
     if training_args.do_eval:
         eval_dataset = ListDataset(load_and_cache_examples(model_args, tokenizer, evaluate=True))

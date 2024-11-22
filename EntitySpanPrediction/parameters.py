@@ -146,35 +146,47 @@ class KATRINAParser(argparse.ArgumentParser):
             type=str,
             help="Path to training data",
         )
+        parser.add_argument(
+            "--use_eval_dataset",
+            default=False,
+            type=bool,
+            help="Wheather to use an evaluation dataset or split the training data",
+        )
+        parser.add_argument(
+            "--eval_ratio",
+            default=0.05,
+            type=float,
+            help="Path to evaluation data",
+        )
     def add_inference_args(self,args=None):
         parser = self.add_argument_group("Model Arguments")
         parser.add_argument(
             "--entity_trie_file",
-            default="precomputed/EntityLinking/entity_trie.pkl",
+            default="../precomputed/EntityLinking/entity_trie.pkl",
             type=str,
             help="Entity Trie File",
         )
         parser.add_argument(
             "--entity_dict_file",
-            default="precomputed/EntityLinking/label_to_entity_wk.pkl",
+            default="../precomputed/EntityLinking/label_to_entity_wk.pkl",
             type=str,
             help="Entity Dictionary File",
         )
         parser.add_argument(
             "--relation_trie_file",
-            default="precomputed/EntityLinking/relation_trie.pkl",
+            default="../precomputed/EntityLinking/relation_trie.pkl",
             type=str,
             help="Relation Trie File",
         )
         parser.add_argument(
             "--relation_dict_file",
-            default="precomputed/EntityLinking/label_to_relation_wk.pkl",
+            default="../precomputed/EntityLinking/label_to_relation_wk.pkl",
             type=str,
             help="Relation Dict File",
         )
         parser.add_argument(
             "--pretrained_model_path",
-            default="precomputed/EntityLinking/span-qald",
+            default="../precomputed/EntityLinking/span_model",
             type=str,
             help="Path to pretrained model"
         )
@@ -192,7 +204,7 @@ class KATRINAParser(argparse.ArgumentParser):
         )
         parser.add_argument(
             "--predict_file",
-            default="input_file",
+            default="../qa-data/LCQUAD/train.json",
             type=str,
             help="lcquad_fomated_file_to_predict_resources_for"
         )

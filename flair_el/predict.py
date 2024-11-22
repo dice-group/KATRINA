@@ -1,17 +1,19 @@
 from flair.data import Sentence
 from flair.nn import Classifier
-from flair_test.entity_linking.GENRE.genre.hf_model import GENRE
-from flair_test.entity_linking.GENRE.genre.trie import Trie
+from flair_el.genre.trie import Trie
+from flair_el.genre.hf_model import GENRE
+
 import pickle
 
 class EntityLinkingModel:
     def __init__(self):
         self.ner_tagger=Classifier.load('ner')
         # TODO: remove hardcoded dependencies for GENRE if necessary
-        self.el_model = GENRE.from_pretrained("../flair_test/data/hf_entity_disambiguation_aidayago").eval()
-        with open("../flair_test/data/kilt_titles_trie_dict.pkl", "rb") as f:
+        self.el_model = GENRE.from_pretrained("../precomputed/flair/hf_entity_disambiguation_aidayago").eval()
+        with open("../precomputed/flair/precomputed/kilt_titles_trie_dict.pkl", "rb") as f:
             self.trie = Trie.load_from_dict(pickle.load(f))
-        self.wikidata_dict=pickle.load(open("../flair_test/data/text_to_wikidata_id","rb"))
+        #self.wikidata_dict=pickle.load(open("../flair_el/data/text_to_wikidata_id","rb"))
+        self.wikidata_dict = pickle.load(open("../precomputed/flair/text_to_wikidata_id", "rb"))
     def predict_ner(self, input_str:str)->Sentence:
         '''
         runs flair entity tagger on an input string and returns the sentence object
