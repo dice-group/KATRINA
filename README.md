@@ -1,8 +1,15 @@
+
 # Joint Query Generation
-This repository 
+## installation
+dowload the repository
+
+run pip install -r requirements
 ## training Query Generation models
 run the script train.py in the package Generator Model
 
+check parameters in the python file parameters.py for joint and single model training.
+
+for joint training the files for both traing datasets should be in the same folder.
 ## Entitiy Linking
 - Train LM-model: run the script train.py in the folder Entity span prediction.
 hyperparameters are defined in the script parameters.py
