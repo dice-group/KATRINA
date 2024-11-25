@@ -5,11 +5,11 @@ The goal is to train unified query generation models across knowledge graphs.
 To this end, this repository contains code for training query generation models based on LLMs in various setups and with different input from entity linking systems.
 ## Installation
 - Dowload the repository
-- run pip install -r requirements
+- Run pip install -r requirements
 ## Files
 All required files including trained models can be downloaded from our FTP server: https://files.dice-research.org/projects/UniQ-Gen/EKAW/
 ## Training Query Generation models
-run the script train.py in the package Generator Model
+Run the script train.py in the package Generator Model
 check parameters in the python file parameters.py for joint and single model training, 
 for editing paths to the datasets and other configurations
 
