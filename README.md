@@ -14,7 +14,7 @@ check parameters in the python file parameters.py for joint and single model tra
 for editing paths to the datasets and other configurations
 
 for joint training the files for both traing datasets should be in the same folder.
-## Entitiy Linking
+## Entity Linking
 ### Wikidata
 - Train LM-model: run the script train.py in the folder Entity span prediction.
 hyperparameters are defined in the script parameters.py
