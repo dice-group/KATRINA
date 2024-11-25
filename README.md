@@ -4,8 +4,8 @@ This repository contains the code for the paper UniQ-Gen: Unified Query Generati
 The goal is to train unified query generation models across knowledge graphs. 
 To this end, this repository contains code for training query generation models based on LLMs in various setups and with different input from entity linking systems.
 ## Installation
-dowload the repository
-run pip install -r requirements
+- Dowload the repository
+- run pip install -r requirements
 ## Files
 All required files including trained models can be downloaded from our FTP server: https://files.dice-research.org/projects/UniQ-Gen/EKAW/
 ## Training Query Generation models
